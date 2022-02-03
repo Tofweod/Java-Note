@@ -2129,7 +2129,7 @@ class DeadLockDemo extends Thread {
 方法
 1.`read()` 从该输入流读取一个字节的数据，如果没有输入，此方法将阻止 
           返回int，如果返回-1表示读取完毕
-2.`read(byte[] b)` 从该输入流读取最多b.length字节的数据到指定字符数组，此方法将阻塞，直到某些输入可用
+2.`read(byte[] b)` 从该输入流读取最多b.length字节的数据到指定字符数组，如果没有输入，此方法将阻塞，直到某些输入可用
           返回**实际读取字节数**，如果返回-1表示读取完毕
 
 
@@ -2213,7 +2213,7 @@ public class FileCopy {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
+            }	
         }
     }
 }
@@ -2267,7 +2267,7 @@ public class FileCopy {
 e.g.模拟修饰器设计模式
 ```java
 public abstract class Reader_ {
-	public void readFiel() {}
+	public void readFile() {}
 	public void readString() {}
 }
 
@@ -2908,17 +2908,208 @@ public class UDPSendB{
   6.发文件
   7.服务器推送新闻
 
+- 项目：[Tofweod/Multi-users-Net-Communication (github.com)](https://github.com/Tofweod/Multi-users-Net-Communication)
 
 
 
+# 反射
+
+- 1.需求：
+
+根据配置文件re.properties指定信息，创建对象并调用方法
+
+classfullpath = psn.study.Cat
+method = hi
+
+```java
+// 传统方式:new对象->调用方法
+package psn.study.Cat
+Cat cat = new Cat();
+cat.hi();
+
+// 尝试
+// 1. 使用properties类,读取配置文件
+Properties properties = new Properties();
+properties.load(new FileInputStream("src\\re.properties"));
+String classfullpath = properties.get("classfullpath").toString();
+String methodName = properties.get("method").toString;
+
+// 创建对象
+new classfullpath(); // 该方法不行
+```
+
+- 2.这种需求在学习框架时特别多，即通过外部文件配置，在不修改源码的情况下，来控制程序，也符合设计模式==ocp原则（开闭原则）==
+
+- 3.开闭原则:不修改源码(闭),扩展功能(开)
+
+解决方法:
+```java
+// 使用反射机制(快速入门)
+
+// 1.加载类,返回Class类型对象
+Class cls = Class.forName(classfullpath); // throws ClassNotFoundException
+// 2.通过cls对象得到加载的类psn.study.Cat的对象实例
+Object obj = cls.newInstance();
+// 3.通过cls得到加载得类psn.study.Cat的methodName的方法对象
+//   即在反射中，可以把方法视为对象（万物皆对象）
+Method method = cls.getMethod(methodName);
+// 通过method调用方法：即通过方法对象实现调用方法
+// 反射机制 方法.invoke(对象)
+method.invoke(obj);
+```
+
+## Java Refleciton
+
+- 反射机制允许程序在执行期借助ReflectionAPI取得任何类的内部信息（比如成员变量，构造器，成员方法等等），并能操作对象的属性及方法
+
+- 加载完类之后，在堆中就产生了一个`Class`类型的对象（一个类只有一个Class对象），这个对象包含了类的完整结构信息，通过这个对象得到类的结构。这个对象就像一面镜子，透过这个镜子看到类的结构，故称之为“==反射==”
+
+cat对象 ---> 类型Person类
+cls对象 ---> 类型Class类
+
+![](D:\JAVA\Note\src\Reflection\Reflection01.png)
+
+作用：反射就是将类别的各个组成部分进行剖析，**可以得到每个组成部分，就可以对每一部分进行操作**。在比较复杂的程序或框架中来使用反射技术，可以简化代码提高程序的复用性
+
+**==Java反射机制可以完成==**
+
+- 在运行时判断任意一个对象所属的类
+- 在运行时构造任意一个类的对象
+- 在运行时得到任意一个类所具有的成员变量和方法
+- 在运行时调用任意一个对象的成员变量和方法
+- 生成动态代理
+
+## 反射相关类
+
+1.`java.lang.Class`:代表一个类，Class对象表示==某个类加载后在堆中的对象==
+
+2.`java.lang.reflect.Method`:代表类的方法
+
+3.`java.lang.reflect.Field`:代理类的成员变量
+
+4.`java.lang.reflect.Constructor`:代表某个类的构造方法
+
+## 反射机制
+
+- 反射优点和缺点
+  1.优点：可以动态的创建和使用对象（也是框架底层的核心），使用灵活，没有反射机制，框架技术就失去底层支撑
+  2.缺点：使用反射基本是解释执行，对执行速度有影响
+
+```java
+/**
+ * 测试反射调用性能和优化方案
+ */
+public class Test{
+	public static void main(String[] args){
+		m1();
+        m2();
+	}
+	
+	// 传统方法调用hi
+	public static void m1(){
+		Cat cat = new Cat();
+		long start = System.currentTimeMillis();
+		for(int i = 0; i <900000; i++){
+			cat.hi();
+		}
+		long end = System.currentTimeMillis();
+		System.out.println("m1用时" + (end - start) + "毫秒");
+	}
+	
+	// 反射机制调用hi
+	public static void m2(){
+		Class cls = Class.forName("Cat");
+		Object o = cls.newInstance();
+		Method method = cls.getMethod("hi")
+		long start = System.currentTimeMillis();
+		for(int i = 0; i <900000; i++){
+			method.invoke(o);
+		}
+		long end = System.currentTimeMillis();
+		System.out.println("m2用时" + (end - start) + "毫秒");
+	}
+}
+
+class Cat{
+	public void hi() {
+		
+	}
+}
+
+/**
+ * 结果
+ * m1用时9毫秒
+ * m2用时16毫秒
+ * 结论
+ * 反射调用方法性能远低于直接调用
+ */
+```
 
 
+- 反射调用优化-关闭访问检查
+  1.Method和Filed,Constructor对象都有`setAccessible()`方法
+  2.`setAccessible()`作用是启动或禁止访问安全检查
+  3.参数值为true表示反射的对象在使用时取消访问检查，提高反射效率；参数值为false则表示反射的对象执行访问检查
+
+```java
+// 反射调用优化+关闭访问检测
+public static void m3(){
+	Class cls = Class.forName("Cat");
+	Object o = cls.newInstance();
+    Method method = cls.getMethod("hi")
+    method.setAccessible(true);//在反射调用方法时，取消访问检查
+	long start = System.currentTimeMillis();
+    for(int i = 0; i <900000; i++){
+		method.invoke(o);
+	}
+	long end = System.currentTimeMillis();
+    System.out.println("m2用时" + (end - start) + "毫秒");
+}
+```
 
 
+## Class类
+
+- 基本介绍
+  1.Class<?>也是类，继承Object类 （`<?>`表示不确定的Java类型）
+  2.Class类不是new出来的，而是系统创建的`ClassLoader.loadClass();`
+  3.对于某个类的Class类对象，在内存中只能有一份，因为在内存中只能加载一次
+  4.每个类的实例都会几点自己是由哪个Class实例生成的
+  5.通过Class对象以及一系列API可以完整得到一个类的完整结构
+  6.Class对象是存放在堆中的
+  7.[类的字节码二进制数据是放在方法区的，也称类的元数据（包括方法代码，变量名，方法名，访问权限等等）](https://zhihu.com/question/38496907)
 
 
+- ==获取Class类对象的方法==
+  1.编译阶段
+    `Class.forName`
+    前提:已知一个类全类名,且该类在类路径下,可通过Class静态方法`Class.forName()`获取,可能抛出ClassNotFoundException
+    ==应用场景==:多用于配置文件,读取类全路径,加载类
+- 2.加载阶段
+    `类.class`
+    前提:若已知具体的类,通过类的class获取,该方法**最为安全可靠,程序性能最高**
+    ==应用场景==:多用于参数传递,比如通过反射得到对应构造器对象
+- 3.运行阶段
+    `对象.getClass()`
+    前提:已知某个类的实例,调用该实例的`getClass()`获取Class对象
+    ==应用场景==:通过创建好的对象,获取Class对象
+- 4.类加载器得到Class对象
+    ```java
+    // 以car对象为例
+    ClassLoader cl = car.getClass().getClassLoader();   
+    Class cls = cl.loadClass(classAllPath);
+    ```
+- 5.基本数据类型(byte,char,boolean,int,float,double,long,short)按如下方式得到Class对象
+    ```java
+    // 以int为例
+    Class<Integer> integerClass = int.class; // 存在自动装箱,拆箱过程(底层是Integer)
+    ```
+- 6.基本数据j类型对应包装类,可通过`.TYPE`得到Class对象
+    ```java
+    Class<Integer> IntegerClass = Integer.TYPE;
+    ```
 
-
+注:上例中integerClass与IntegerClass相同
 
 
 
