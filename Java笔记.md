@@ -3077,7 +3077,7 @@ public static void m3(){
   4.每个类的实例都会几点自己是由哪个Class实例生成的
   5.通过Class对象以及一系列API可以完整得到一个类的完整结构
   6.Class对象是存放在堆中的
-  7.[类的字节码二进制数据是放在方法区的，也称类的元数据（包括方法代码，变量名，方法名，访问权限等等）](https://zhihu.com/question/38496907)
+  7.[类的字节码二进制数据是放在方法区的，也称类的元数据（包括方法代码，变量名，方法名，访问权限等等）](https://zhihu.com/question/38496907)	
 
 
 - ==获取Class类对象的方法==
@@ -3085,31 +3085,186 @@ public static void m3(){
     `Class.forName`
     前提:已知一个类全类名,且该类在类路径下,可通过Class静态方法`Class.forName()`获取,可能抛出ClassNotFoundException
     ==应用场景==:多用于配置文件,读取类全路径,加载类
-- 2.加载阶段
+  2.加载阶段
     `类.class`
     前提:若已知具体的类,通过类的class获取,该方法**最为安全可靠,程序性能最高**
     ==应用场景==:多用于参数传递,比如通过反射得到对应构造器对象
-- 3.运行阶段
+  3.运行阶段
     `对象.getClass()`
     前提:已知某个类的实例,调用该实例的`getClass()`获取Class对象
     ==应用场景==:通过创建好的对象,获取Class对象
-- 4.类加载器得到Class对象
+  4.类加载器得到Class对象
     ```java
     // 以car对象为例
     ClassLoader cl = car.getClass().getClassLoader();   
     Class cls = cl.loadClass(classAllPath);
     ```
-- 5.基本数据类型(byte,char,boolean,int,float,double,long,short)按如下方式得到Class对象
+  5.基本数据类型(byte,char,boolean,int,float,double,long,short)按如下方式得到Class对象
     ```java
     // 以int为例
     Class<Integer> integerClass = int.class; // 存在自动装箱,拆箱过程(底层是Integer)
     ```
-- 6.基本数据j类型对应包装类,可通过`.TYPE`得到Class对象
+  6.基本数据j类型对应包装类,可通过`.TYPE`得到Class对象
     ```java
     Class<Integer> IntegerClass = Integer.TYPE;
     ```
 
 注:上例中integerClass与IntegerClass相同
+
+- 拥有Class对象的类型
+  1.外部类，内部类
+  2.interface
+  3.数组
+  4.enum
+  5.annotation
+  6.基本数据类型
+  7.void
+
+## 类加载
+
+- 基本说明
+  反射机制是java实现动态语言的关键，也就是通过反射实现类动态加载 
+  1.静态加载：编译时加载相关的类，如果没有没有则报错，依赖性强
+  2.动态加载：运行时加载需要的类，如果运行时不用该类，则不报错，降低了依赖性
+
+  e.g.
+ ```java
+ // 此案例Dog类和Person类均未创建
+ public class ClassLoarder_ {
+ 	public static void main(String[] args) throws Exception{
+ 		Scanner scanner = new Scanner(System.in);
+ 		String key = scanner.next();
+ 		switch(key){
+ 			case "1":
+ 				Dog dog = new Dog(); // 静态加载，编译时报错
+ 			case "2":
+ 				Class cls = Class.forName("Person"); // 动态加载，不运行不报错
+		}
+	}
+ }
+ ```
+- ==类加载时机==
+  1.创建对象时（new）
+  2.当子类被加载时，父类也会加载
+  3.调用类中的静态成员
+  4.反射
+
+- 类加载过程图
+
+<img src="D:\Java\Note\src\Reflection\Reflection02.png" style="zoom:50%;" />
+
+<img src="D:\Java\Note\src\Reflection\Reflection03.png" style="zoom: 60%;"/>
+
+- 加载阶段
+  JVM在该阶段的主要目的是将字节码从不同的数据源（class文件，jar包，甚至网络）转化为二进制字节流加载到内存中，并生成一个代表该类的`java.lang.Class`对象
+- 连接阶段-验证
+  1.目的是为例确保Class文件的字节流中包含的信息符合当前虚拟机要求，并不会危害虚拟机滋生的安全
+  2.包括：文件格式验证（是否以魔数**0xcafebabe**开头)，元数据验证，字节码验证和符号引用验证
+  3.可以考虑使用`-Xverify：none`参数开关闭大部分类的验证措施，缩短虚拟机类加载时间
+- 连接阶段-准备
+  1.JVM会在该阶段对静态变量分配内存并进行默认初始化（对应数据类型的默认初始值，如`0、0L、null、false`等）。这些变量所使用的内存都会在方法区中进行分配
+  2.`final static`类型数据是常量，在此阶段**直接赋值**
+- 连接阶段-解析
+  1.虚拟机将常量池的符号引用替换为直接引用的过程
+  2.在编译过程类与类之间没有真正分配内存地址,为符号引用
+- 初始化阶段
+  1.该阶段真正执行类中定义的Java程序代码,此阶段是执行`<clinit>()`方法的过程
+  2.`<clinit>()`方法是由编译器按语句在源文件中出现的顺序，依次自动收集类中所有==静态变量==的赋值动作和==静态代码块==中的语句，并进行合并
+  3.虚拟机会保证一个类的`<clinit>()`方法在多线程环境中被正确地加锁、同步，如果多个线程同时去初始化一个类，那么只会有一个线程去执行这个类的`<clinit>()`方法，其他线程都需要阻塞等待，直到活动线程执行的该方法完毕
+
+## 通过反射获取类的结构信息
+
+- 第一组
+  1.`getName()`：获得全下·类名
+  2.`getSimpleName()`:获得简单类名
+  3.`getFileds()`:获取所有public修饰的属性，==包括本类以及父类==
+  4.`getDeclaredFields()`:获取本类所有属性，==不包括父类==
+  5.`getMethods()`:获取所有public修饰的方法，==包括本类及父类==
+  6.`getDeclaredMethods()`:获取本类所有方法，==不包括父类==
+  7.`getConstructors()`:获取所有public修饰的构造器，==不包括父类==
+  8.`getDeclaredConstructors()`:获取本类所有构造器
+  9.`getPackage()`:以Package形式返回包信息
+  10.`getSuperClass()`:以Class形式返回父类信息
+  11.`getInterfaces`:以Class[]形式返回接口信息
+  12.`getAnnotations()`:以Annotation[]形式返回注解
+
+
+
+- 第二组
+  1.`getModifiers()`:以int形式返回修饰符
+    （默认修饰符是0，public是1，private是2，protected是4，static是8，final是16)e.g.`public static`为1+8=9
+  2.`getType()`:以Class形式返回类型
+
+- 第三组
+  1.`getReturnType()`:以Class形式获取返回类型
+  2.`getParameterTypes()`:以Class[]返回参数类型数组
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
