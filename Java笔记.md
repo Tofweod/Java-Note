@@ -3195,56 +3195,139 @@ public static void m3(){
     （默认修饰符是0，public是1，private是2，protected是4，static是8，final是16)e.g.`public static`为1+8=9
   2.`getType()`:以Class形式返回类型
 
+  
+  
 - 第三组
   1.`getReturnType()`:以Class形式获取返回类型
   2.`getParameterTypes()`:以Class[]返回参数类型数组
 
+## 反射暴破
 
+使用反射可以访问private修饰的类成员
 
+```java
+/**
+ * 暴破演示
+ */
+public class Test{
+    Class personCls = Class.forName("Person");
+    
+    public static void main(String[] args){
+        
+    }
+    
+    // 暴破构造器
+    public void testConstructor(){
+        // 获取私有构造器
+        Constructor<?> constructor = personCls.getDeclaredConstructor(int.class, String.class);
+        // 暴破
+        constructor.setAccessible(true);
+        // 创建对象
+        constructor.newInstance(10,"person"); // 如果没有暴破，则会抛出IllegalAccessException
+    }
+    
+    // 暴破属性
+    public void testField(){
+        // 创建对象
+        Object o = personCls.newInstance();
+        // 获得私有属性
+        Field field = personCls.getDeclaredField("age");
+        // 暴破
+        field.setAccessible(true);
+        // 设置age，原值为10
+        field.set(o,20); // 将对象o的age设置为20
+        field.get(o); // 获取o对象的age属性
+        // 如果是静态属性，对象参数可以设置为null
+	}
+    
+    // 暴破方法
+    public void testMethod(){
+        // 与暴破属性同理
+        // 获取方法 Method m = personCls.getDeclaredMethod("方法名"，参数.class);
+    }
+}
 
+class Person{
+    private int age = 10;
+    private String name = "aPerson";
+    
+    public Person{}
+    
+    private Person(int age, String name){
+        this.age = age;
+        this.name = name;
+	}
+}
+```
 
+# ==MySQL==
 
+连接到MySQL服务的指令
 
+`mysql -h 主机IP -P 端口号 -u 用户名 -p密码`
 
+注：
+ 1.-p密码后无空格
+ 2.-h 主机IP 默认本机IP；-P 端口号默认3306
+ 3.-P 端口号必须和my.ini配置文件相匹配
 
+## MySQL三层结构
 
+1.安装MySQL数据库，就是在主机上安装一个数据库管理胸痛DBMS(database manage system),这个管理程序可以管理多个数据库
+2.一个数据库中可以创建多个表，以保存数据
 
+- 数据库管理系统、数据库和表关系示意图
 
+<img src="D:\Java\Note\src\MySQL\MySQL01.png">
 
+==数据库-表的本质仍然是文件==
 
+表的一行称之为一条记录->在java程序中，一行记录往往使用对象来映射
 
+- SQL语句分类
+  1.DDL:数据定义语句 [creat表，库。。]
+  2.DML:数据操作语句 [增insert，删delete，改update]
+  3.DQL:数据查询语言 [select]
+  4.DCL:数据控制语句 [管理数据库，比如用户权限grant&revoke]
 
+## MySQL操作
 
+### 数据库操作
 
+创建数据库:
+ `CREATE DATABASE [IF NOT EXISTS]db_name [create_specification[,create_specification]...]` 
 
+create_specification:
+  [DEFAULT]CHARACTER SET character_name
+  [DEFAULT]COLLATE collation_name
 
+  1.CHARACTER SET:指定数据库采用的字符集，默认utf8
+  2.COLLATE:指定数据库字符集的校对规则，默认utf8_general_ci
+            		常用的utf8_bin[区分大小写],utf8_general_ci[不区分大小写]
 
+```mysql
+# 创建字符集为utf8，校对规则为utf8_general_ci的数据库db01
+CREATE DATABASE db01 CHARARCTER SET utf8 COLLATE utf8_general_ci
+```
 
+ ==注==:在创建数据库、表时,为避免关键字,可以用反引号解决
 
+显示数据库语句:
+`SHOW DATABASES`
 
+显示数据库创建语句:
+`SHOW CREATE DATABASE db_name`
 
+数据库删除语句[==慎用==]
+`DROP DATABASE [IF EXISTS] db_name`
 
+备份数据库(在==DOS执行==命令行)----**备份的文件就是对应的sql语句**
+`mysqldump -u 用户名 -p密码 -B 数据库1 数据库2 ... 数据库n > 路径/文件名.sql` # 备份多个数据库	
+`mysqldump -u 用户名 -p密码 数据库 表1 表2 ... 表n > 路径/文件名.sql` # 备份数据库中具体的表
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+恢复数据库(进入MySQL命令行执行)
+ 1.`source 文件名.sql`
+ 2.直接将sql文件内容粘贴至查询编译器执行
 
 
 
