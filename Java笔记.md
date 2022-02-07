@@ -3149,7 +3149,7 @@ public static void m3(){
   3.调用类中的静态成员
   4.反射
 
-- 类加载过程图
+  **类加载过程图**
 
 <img src="D:\Java\Note\src\Reflection\Reflection02.png" style="zoom:50%;" />
 
@@ -3295,6 +3295,7 @@ class Person{
 ### 数据库操作
 
 创建数据库:
+
  `CREATE DATABASE [IF NOT EXISTS]db_name [create_specification[,create_specification]...]` 
 
 create_specification:
@@ -3313,45 +3314,134 @@ CREATE DATABASE db01 CHARARCTER SET utf8 COLLATE utf8_general_ci
  ==注==:在创建数据库、表时,为避免关键字,可以用反引号解决
 
 显示数据库语句:
-`SHOW DATABASES`
+
+`SHOW DATABASES LIKE '数据库名' ` 
 
 显示数据库创建语句:
+
 `SHOW CREATE DATABASE db_name`
 
 数据库删除语句[==慎用==]
+
 `DROP DATABASE [IF EXISTS] db_name`
 
 备份数据库(在==DOS执行==命令行)----**备份的文件就是对应的sql语句**
+
 `mysqldump -u 用户名 -p密码 -B 数据库1 数据库2 ... 数据库n > 路径/文件名.sql` # 备份多个数据库	
 `mysqldump -u 用户名 -p密码 数据库 表1 表2 ... 表n > 路径/文件名.sql` # 备份数据库中具体的表
 
-恢复数据库(进入MySQL命令行执行)
+恢复数据库(进入==MySQL命令行==执行)
+
  1.`source 文件名.sql`
  2.直接将sql文件内容粘贴至查询编译器执行
+ 注：备份数据库和恢复数据库**使用命令行不同**，前者是DOS，后者是Mysql
+
+### 表操作
+
+创建表
+
+`CREATE TABLE table_name
+ (
+ 	field1 datatype,
+ 	field2 datatype,
+ 	field3 datatype
+ )character set 字符集 collate 校对规则 engine 存储引擎`
+
+ field:指定列名	datatype:指定列类型（字段类型）
+ engine:引擎
+
+ 创建表的时候，要根据需保存数据创建相应的列，并根据数据的类型定义相应的列类型
+
+```mysql
+/*
+ 创建表实例
+ */
+CREATE TABLE `user`(
+	id int,
+    `name` varchar(255),
+    `password` varchar(255),
+    `birthday` date)
+    CHARACTER SET utf8 COLLATE utf8_bin ENGINE INNODB;
+)
+```
+
+## MySQL数据类型
+
+MySQL数据类型即MySQL列类型
+
+**分类**
+
+- 数值类型
+- 文本、二进制类型
+- 时间日期类型
+
+### 数值类型
+
+- 整型
+  1.`tinyint` [一个字节] 
+  2.`smallint` [两个字节]
+  3.`mediumint` [三个字节]
+  **4**.`int` [四个字节]
+  5.`bigint` [八个字节]
+  定义无符号整数，在类型后加`unsigned`
+  
+- 小数类型
+  1.`float` [单精度 4个字节]
+  **2**.`double` [双精度 8个字节]
+  **3**.`decimal[M,D]` [大小由M,D决定] 定点数 M指定长度，D表示小数点位数
+  decimal说明：
+  1.如果D为0，则值没有小数部分或分数部分
+  2.M最大值为65，D最大值为30；M默认值为10，D默认值为0
+  3.希望小数精度最高，推荐使用decimal
+  4.decimal占字节M+2个字节
+  e.g.
+  decimal(5，2)最大值为9999.99
+
+### 文本类型(字符串类型)
+
+  **1**.`char` 0-255
+  **2**.`varchar` 0-65535(2^16^-1)
+  **3**.`text` 0-65535
+  4.`longtext` 0-2^32^-1
+
+- 细节
+  - size表示==字符数==
+  - CHAR(size)
+    固定长度字符串 最大255==字符==
+  - VARCHAR(size) 0-65535 
+    可变长度字符串 最大65535==字节== [uft8编码最大21844字符，因为有1-3个字节用于记录大小，则65532/3=21844]
+
+### 二进制数据类型
+
+  1.`blob` 0-65535
+  2.`longblob` 0-2^32^-1
+
+### 日期类型
+
+  1.`date` 日期类型[年-月-日]
+  2.`time` 时间类型[时-分-秒]
+  **3**.`datetime` [年-月-日-时-分-秒] 格式：YYYY-MM-DD HH:mm:ss
+  **4**.`timestamp` 时间戳
+  5.`year` 年
 
 
 
 
 
+**特殊** ：==bit== 
 
+- 基本使用 
+  bit(M)
+  
+- 细节说明
+  1.bit字段显示时，按==位==的方式显示，m=8表示一个字节
+  2.查询时仍热可以使用添加的数值
+  3.如果一个值只有0和1，可以考虑使用bit(1)节约空间
+  4.M指定位数，默认位1，范围1-64
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+e.g.
+255位表示为`b'11111111'`
 
 
 
