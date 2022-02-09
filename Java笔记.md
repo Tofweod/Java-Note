@@ -3365,6 +3365,56 @@ CREATE TABLE `user`(
 )
 ```
 
+删除表
+
+`DROP TABLE 表名`
+
+#### ==修改表==
+
+使用`ALTER TABLE`语句追加，修改，删除列的语法，括号可去
+
+语法格式
+
+```mysql
+{ ADD COLUMN <列名> <类型>
+| CHANGE COLUMN <旧列名> <新列名> <新列类型>
+| ALTER COLUMN <列名> { SET DEFAULT <默认值> | DROP DEFAULT }
+| MODIFY COLUMN <列名> <类型>
+| DROP COLUMN <列名>
+| RENAME TO <新表名>
+| CHARACTER SET <字符集名>
+| COLLATE <校对规则名> }
+| CHANGE <旧字段名> <新字段名> <新数据类型>； -- 新数据类型不能为空
+```
+
+
+
+- 添加列
+
+  `ALTER TABLE tablename
+   ADD	(column datatype [DEFAULT expr]
+          [,column datatype]...);`
+
+
+ - 修改列
+
+    `ALTER TABLE tablename
+     MODIFY	(column datatype [DEFAULT expr]
+            [,column datatype]...);`
+    
+ - 删除列
+
+    `ALTER TABLE tablename
+     DROP (column1,column2...);`
+
+ - 查看表的结构
+
+    `desc tablename;`
+    
+
+修改表名 `Rename table 表名 to 新表名;`
+修改字符集\校对规则 `alter table 表名 character set 字符集\collate 校对规则;`
+
 ## MySQL数据类型
 
 MySQL数据类型即MySQL列类型
@@ -3402,7 +3452,8 @@ MySQL数据类型即MySQL列类型
   **1**.`char` 0-255
   **2**.`varchar` 0-65535(2^16^-1)
   **3**.`text` 0-65535
-  4.`longtext` 0-2^32^-1
+  4.`mediumtext` 0-2^24^-1
+  5.`longtext` 0-2^32^-1
 
 - 细节
   - size表示==字符数==
@@ -3410,6 +3461,11 @@ MySQL数据类型即MySQL列类型
     固定长度字符串 最大255==字符==
   - VARCHAR(size) 0-65535 
     可变长度字符串 最大65535==字节== [uft8编码最大21844字符，因为有1-3个字节用于记录大小，则65532/3=21844]
+  - CHAR(4)和VARCHAR(4)中的4表示字符数，不区分汉字还是字母
+  - CHAR(4)是定长（固定大小），即使插入两个字符，也会占用四个字符的空间
+  - VARCHAR(4)是变长，实际占用空间大小并不是4个字符，而是根据实际占用空间来分配（varchar本身还**需要1-3个字节来记录存放内容长度**）
+  - 查询速度：char>varchar
+  - 存放文本，也可以用text替代varchar，可将text视作varchar列
 
 ### 二进制数据类型
 
@@ -3423,6 +3479,20 @@ MySQL数据类型即MySQL列类型
   **3**.`datetime` [年-月-日-时-分-秒] 格式：YYYY-MM-DD HH:mm:ss
   **4**.`timestamp` 时间戳
   5.`year` 年
+
+```mysql
+/*
+ * 演示时间相关类型
+ */
+CREATE TABLE t(
+	birthday DATE, -- 记录生日年月日
+    job_time DATETIME, -- 记录工作时间年月日时分秒
+    login_time TIMESTAMP -- 记录登录时间，如果需要login_time列自动更新，需要配置
+    			NOT NULL DEFAULT CURRENT_TIMESTAMP -- 不允许为空且默认当前时间戳
+    			ON UPDATE CURRENT_TIMESTAMP -- 修改时自动以当前时间戳更新
+);
+INSERT INTO t8(birthday,job_time) VALUES('2022-11-11','2022-11-11 10:10:10'); -- login_time未指定信息自动以当前时间填充列；更新某条记录，login_time自动更新
+```
 
 
 
@@ -3442,6 +3512,155 @@ MySQL数据类型即MySQL列类型
 
 e.g.
 255位表示为`b'11111111'`
+
+## CRUD
+
+### INSERT
+
+- 使用INSERT语句向表中插入数据
+
+  `INSERT INTO table_name(column1,column2...) 
+   VALUES(value1,value2...);`
+  
+- **细节说明**
+  1.插入数据应与字段数据类型相同，但底层存在自动类型转化，如字符串转数字
+  2.数据长度应在列的规定范围内
+  3.在values中列出的数据位置不许与被加入的列的位置相对应
+  4.字符和日期型数据应包含在单引号中
+  5.列可以插入空值[前提时该字段允许为空]，insert into table_name values
+  6.`insert into tab_name  values(),(),()...;`添加多条记录
+  7.如果给表中所有字段添加数据，可以不写前面的字段名称
+  8.默认值使用，当不给某个字段时，如果有默认值则会添加默认值，否则报错
+
+### UPDATE
+
+- 使用update语句修改表中数据
+
+ `UPDATE table_name
+  SET col_name1=expr1,col_name2=expr2
+  [WHERE where_defination];`
+
+- 使用细节
+  1.UPDATE语法可以用新值更新原有表行中的各列
+  2.SET子句指示要修改哪些列和要给予哪些值
+  3.WHERR子句指定更新哪些行，如没有where约束则更新所有记录，==慎重==
+  4.SET后语句可为表达式
+  5.如果需要修改多个字段，可以使用`set 字段1=值1,字段2=值2...`
+
+### DELETE
+
+- 使用delete语句删除表中数据
+
+ `DELETE FROM table_name
+  [WHERER where_defination];`
+
+- 使用细节
+  1.如果没有where子句，将删除表中所有数据
+  2.delete语句不能删除某一列的值（解决方案：可用update设置为null）
+  3.使用delete语句仅能删除记录，不能删除表本身
+
+### ==SELECT==
+
+#### 基本使用
+
+- 基本语法
+
+  `SELECT [DISTINCT] * | {column1,column2...}
+   FROM table_name;`
+  
+- 注意事项
+  1.select指定查询哪些列的数据
+  2.colunmn指定列名
+  3.distinct可选，指显示结果时是否去掉重复数据，**需要每个字段都相同**
+  4.*代表查询所有列
+  5.from指定查询哪张表
+
+- 使用表达式对查询的列进行运算
+
+  `SELECT [DISTINCT] * | {column1 | expression, column2 | expression...}
+   FROM table_name;`
+
+- 在select语句中可以使用as语句
+
+  `SELECT column_name as 别名 from 表名;`
+  
+- 在WHERE子句中常用的运算符
+
+|    类型    |       运算符        |                       含义                        |
+| :--------: | :-----------------: | :-----------------------------------------------: |
+| 比较运算符 |   >,< ,>=,<=,=,!=   |    大于，小于，大于（小于）等于，等于，不等于     |
+|            | BETWEEN ... AND ... |                显示在某一区间的值                 |
+|            |       IN(set)       | 显示在in列表中的值，e.g.IN(100,200)，==不是区间== |
+|            |    LIKE,NOT LIKE    |                     模糊查询                      |
+|            |       IS NULL       |                   判断是否为空                    |
+| 逻辑运算符 |         and         |                 多个条件同时成立                  |
+|            |         or          |                 多个条件任一成立                  |
+|            |         not         |                      不成立                       |
+
+- 使用order by子句排序查询结果
+
+ `SELECT column1,column2...
+  FROM  table_name
+  order by column asc|desc;`
+
+ 说明：
+  1.order by指定排序的列，排序的列既可以是表中的列名，也可以是select语句后指定的别名
+  2.asc升序（默认），desec降序
+  3.order by子句应位于SELECT语句的末尾
+
+e.g.按总分total降序输出
+
+```mysql
+/*
+ * 给定表格t
+ *  +----------+------+---------+
+ *  | name     | math | chinese |
+ *  +----------+------+---------+
+ *  | xiaohong |  100 |      90 |
+ *  | xiaoming |   70 |      95 |
+ *  +----------+------+---------+
+ */
+SELECT *,(math+chinese) AS total
+FROM t
+ORDER BY total desc;
+```
+
+#### 统计函数
+
+Count——返回行的总数
+
+`SELECT count(*)|count(列名) FROM table_name
+ [WHERE where_defination];`
+
+**count(*)和count(列)区别**
+ 1.count(*)返回满足条件的所有记录数
+ 2.count(列)统计满足条件的某列有多少个，**但是会排除为null情况**
+
+------
+
+Sum——合计函数
+
+sum函数返回满足where条件的行的和，一般使用在数值列
+
+`SELECT sum(列名|expression) {，sum(列名|expression)...} FROM table_name
+ WHERE where_defination;`
+
+  **注意事项**
+  1.多列求和==‘，’==不可少
+  2.avg——求平均函数
+  3.max,min——求最大值（最小值）函数
+
+#### GROUP BY
+
+- 使用group by子句对列进行分组
+
+`SELECT column1,column2,... FROM table_name
+ GROUP BY column HAVING ...;`
+
+ group by用于对查询结果进行分组统计，having用于限制分组显示结果，可以使用别名
+
+
+
 
 
 
