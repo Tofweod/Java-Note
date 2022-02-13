@@ -18,8 +18,8 @@
 说明：它是一种子类继承父类的特征和行为，使得子类对象（实例）具有父亲的实例域和方法，或子类从父类继承方法，使得子类具有父类相同的行为。
 
 **创建子类实例时，先调用父类构造器默认super();再调用子类构造器**
- 
-易错----==super 与this在构造器的使用==
+
+本人易错----==super 与this在构造器的使用==
 
 ==注意this使用时所指对象==
 
@@ -3365,6 +3365,8 @@ CREATE TABLE `user`(
 )
 ```
 
+补充：[==MySQL数据库三范式==]([MySQL数据库三范式 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/72197799#:~:text=MySQL数据库三范式. 设计关系型数据库时，遵从不同的规范要求，设计出合理的关系型数据库，这些不同的规范要求被称为不同的范式，各种范式呈递次规范，越高的范式数据库冗余越小。.,目前关系型数据库有六种范式：第一范式（1NF）、第二范式（2NF）、第三范式（3NF）、巴斯-科德范式（BCNF）、第四范式（4NF）和第五范式（5NF，又称完美范式）。. 一般来说 ))
+
 删除表
 
 `DROP TABLE 表名`
@@ -3586,16 +3588,16 @@ e.g.
   
 - 在WHERE子句中常用的运算符
 
-|    类型    |       运算符        |                       含义                        |
-| :--------: | :-----------------: | :-----------------------------------------------: |
-| 比较运算符 |   >,< ,>=,<=,=,!=   |    大于，小于，大于（小于）等于，等于，不等于     |
-|            | BETWEEN ... AND ... |                显示在某一区间的值                 |
-|            |       IN(set)       | 显示在in列表中的值，e.g.IN(100,200)，==不是区间== |
-|            |    LIKE,NOT LIKE    |                     模糊查询                      |
-|            |       IS NULL       |                   判断是否为空                    |
-| 逻辑运算符 |         and         |                 多个条件同时成立                  |
-|            |         or          |                 多个条件任一成立                  |
-|            |         not         |                      不成立                       |
+|    类型    |       运算符        |                         含义                          |
+| :--------: | :-----------------: | :---------------------------------------------------: |
+| 比较运算符 |   >,< ,>=,<=,=,!=   |      大于，小于，大于（小于）等于，等于，不等于       |
+|            | BETWEEN ... AND ... |                  显示在某一区间的值                   |
+|            |       IN(set)       | 显示在in**列表**中的值，e.g.IN(100,200)，==不是区间== |
+|            |    LIKE,NOT LIKE    |                       模糊查询                        |
+|            |       IS NULL       |                     判断是否为空                      |
+| 逻辑运算符 |         and         |                   多个条件同时成立                    |
+|            |         or          |                   多个条件任一成立                    |
+|            |         not         |                        不成立                         |
 
 - 使用order by子句排序查询结果
 
@@ -3625,7 +3627,18 @@ FROM t
 ORDER BY total desc;
 ```
 
-#### 统计函数
+#### GROUP BY
+
+- 使用group by子句对列进行分组
+
+`SELECT column1,column2,... FROM table_name
+ GROUP BY column HAVING ...;`
+
+ group by用于对查询结果进行分组统计，having用于限制分组显示结果，可以使用别名
+
+#### 函数
+
+##### 统计函数
 
 Count——返回行的总数
 
@@ -3634,7 +3647,7 @@ Count——返回行的总数
 
 **count(*)和count(列)区别**
  1.count(*)返回满足条件的所有记录数
- 2.count(列)统计满足条件的某列有多少个，**但是会排除为null情况**
+ 2.count(列名)统计满足条件的某列有多少个，**但是会排除为null情况**
 
 ------
 
@@ -3650,21 +3663,206 @@ sum函数返回满足where条件的行的和，一般使用在数值列
   2.avg——求平均函数
   3.max,min——求最大值（最小值）函数
 
-#### GROUP BY
+##### 字符串函数
 
-- 使用group by子句对列进行分组
+`CHARSET(str)`——返回字符串字符集
 
-`SELECT column1,column2,... FROM table_name
- GROUP BY column HAVING ...;`
+`CONCAT(string[,...])`——连接字串
 
- group by用于对查询结果进行分组统计，having用于限制分组显示结果，可以使用别名
+`INSTR(string,substring)`——返回substring在string中出现位置，没有则返回0
 
+`UCASE(string)`——转换为大写
 
+`LCASE(string)`——转换为小写
 
+`LEFT(string，length)`——从string左边起取length个字符;`RIGHT`从右取
 
+`LENGTH(string)`——返回string长度，按照字节
 
+`REPLACE(str,serach_str,replace_str)`——在str中用replace_str替换search_str，str表示查找范围
 
+`STRCMP(string1,string2)`——逐字符比较两个字串**大小**.大于返回1，小于返回-1，等于返回0
 
+`SUBSTRING(str,position,[,length])`——从str的position位置开始（从1开始计算），取length个字符
+
+`LTRIM(string) RTRIM(string)`——去除前端或后端空格 ;`TRIM`去除两端空格
+
+==注：DUAL亚元表==
+
+##### 数学函数
+
+`ABS(num)`——绝对值
+
+`BIN(decimal_number)` ——十进制转二进制
+
+`CEILING(num)`——向上取整
+
+`FLOOR(num)`——向下取整
+
+`CONV(number,from_base,to_base)`——进制转换
+
+`FORMAT(num,decimal_places)`——保留小数位数（四舍五入）
+
+`HEX(DecimalNumber)`——转十六进制
+
+`LEAST(number1,number2[,...])`——求最小值
+
+`MOD(numerator,denominator)`——求余
+
+`RAND([seed])`——返回随机数，范围[0,1];如果指定了seed，则返回可重复的随机数序列
+
+##### 日期函数
+
+`CURRENT_DATE()`——当前日期
+
+`CURRENT_TIME()`——当前时间
+
+`CURRENT_TIMESTAMP()`——当前时间戳
+
+`DATE(datetime)`——返回datetime日期部分
+
+`DATE_ADD(date,INTERVAL d_value d_type)`——在date中加上日期或时间
+
+`DATE_SUB(date,INTERVAL d_value d_type)`——在date中减去日期或时间
+
+`DATEDIFF(date1，date2)`——两个日期差（单位：天）
+
+`TIMEDIFF(date1,date2)`——两个时间差（单位：HH:mm:ss）
+
+`NOW()`——当前时间
+
+`YEAR|MONTH|DAY|DATE(datetime)`——取出datetime的年月日
+
+`UNIX_TIMESTAMP()`——返回1970-1-1到现在的秒数
+
+`FROM_UNXITIME()`——把一个unix_timestamp的秒数转换为指定格式的日期
+                                   e.g.from_unixtime(unix_timestamp(),'%Y-%m-%d %M %H:%i:%s'); 格式为"年-月-日 星期 时:分:秒"
+                                   ==意义:存放一个整数表示时间,通过from_unixtime()转换==
+
+- 细节说明
+  1.DATE_ADD()中interval后可以是year,month,day,second等;DATE_SUB()同理
+  2.DATEDIFF(date1,date2)是date1-date2的天数,可以为负
+  3.TIMEDIFF()的参数可以为time或datetime,结果范围为-838:59:59~838:59:59
+  4.其余带参数函数的形参类型可以为date,datetime,timestamp
+
+##### 加密和系统函数
+
+`USER()`——可以查看登录到mysql的有哪些用户,以及登录IP(格式:用户@IP地址)
+
+`DATABASE()`——查询数据库名称
+
+`MD5(str)`——为字符串算出一个MD5 32的字符串,常用于密码加密
+
+`PASSWORD(str)`——从原密码str计算并返回密码字符串
+
+**结论：存放密码时一定要加密**
+
+##### 流程控制函数
+
+`IF(expr1,expr2,expr3)`——如果expr1为true，返回expr2；否则返回expr3
+
+`IFNULL(expr1,expr2)`——如果expr1不为null，则返回expr1；否则返回expr2
+
+`SELECT CASE WHEN expr1 THEN expr2
+ WHEN expr3 THEN expr4 ElSE expr5
+ END;[类似的多重分支]`——如果expr1为true，返回expr2；如果expr3为true，返回expr4，否则返回expr5
+
+#### 查询增强
+
+- 模糊查询(LIKE)
+  1.`%`表示0到多个任意字符
+  2.`_`表示单个任意字符
+- ORDER BY & GROUP BY
+  1.`ORDER BY column1，column2`表示先按column1排序，再按column2排序
+  2.`GROUP BY`同理
+- 分页查询
+  基本语法：`SELECT ... LIMIT START,ROWS;`
+  表示从==start+1==行开始取，取出rows行
+  start和rows的类型是整数，不能用表达式
+- 使用顺序:**GROUP BY,HAVING,ORDER BY,LIMIT**
+
+### ==多表查询==
+
+说明：
+  多表查询是指基于两个或以上的表的查询
+
+#### 多表笛卡尔集
+
+默认情况下，两个表查询时规则如下：
+  1.从第一张表中取出一行和第二张表的每一行组合，返回结果含有两张表所有列
+  2.一共返回记录数；第一张表行数*第二张表行数
+  3.这样的多表查询默认处理返回的结果，称为**笛卡尔集**
+  4.多表查询关键：==写出正确的过滤条件==[WHERE]
+
+==技巧==：多表查询的条件不能少于（至少）表的个数-1，否则会出现笛卡尔集
+
+#### 多表查询
+
+案例表结构：
+
+```mysql
+ CREATE TABLE `emp` (
+  `empno` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `ename` varchar(20) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `job` varchar(9) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `mgr` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `hiredate` date NOT NULL,
+  `sal` decimal(7,2) NOT NULL,
+  `comm` decimal(7,2) NOT NULL,
+  `deptno` mediumint(8) unsigned NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+```
+
+e.g.
+
+```mysql
+-- 显示各个员工的姓名，工资，以及工资级别
+SELECT employee_name,salary,sal_grade
+	FROM emp,salgrade
+	WHERE salary BETWEEN losal AND hisal;
+```
+
+- 自连接
+
+自连接是指在同一张表连接查询[将同一张表看作两张表]
+
+**同张表进行多表查询应取别名**
+
+e.g.
+
+```mysql
+-- 显示员工和上级的名字
+SELECT worker.ename,boss.ename
+	FROM emp worker,emp boss -- 为两张同表取别名
+ 	WHERE worker.mgr = boss.empno;
+```
+
+##### 子查询
+
+子查询是指嵌入在其他sql语句中的select语句，也叫嵌套查询
+
+- 单行子查询
+
+  子查询只返回一行数据
+
+  e.g.
+
+  ```mysql
+  -- 如何显示与smith同部门的员工
+  /*
+  	1.先查询smith部门号
+  	2.把上述select语句当做一个子查询使用
+  */
+  SELECT * FROM emp
+  	WHERE depno = (
+      	SELECT depno FROM emp -- 该select语句作为子查询
+          WHERE ename = 'smith'
+      );
+  ```
+
+  
+
+- 多行子查询
 
 
 
