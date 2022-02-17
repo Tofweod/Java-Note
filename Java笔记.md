@@ -3864,9 +3864,441 @@ SELECT worker.ename,boss.ename
 
 - 多行子查询
 
+  子查询返回多行数据,==使用关键字in==
+
+  e.g.
+
+  ```mysql
+  -- 如何查询和部门10的工作相同的员工，但不含10号部门自己的员工
+  /*
+  	1.查询10号部门有哪些工作
+  	2.把上述select语句当做子查询使用
+  */
+  SELECT * FROM emp 
+  	WHERE job IN (
+          SELECT DISTINCT job FROM emp 
+          WHERE deptno = 20) AND deptno != 20;
+  ```
+  
+  
+
+**可以将子查询当做临时表使用进行多表查询**
+
+- ALL & ANY
+
+```mysql
+-- 显示工资比30号部门所有员工都高的员工
+-- 方法1
+SELECT * FROM emp 
+	WHERE sal > (
+        SELECT MAX(sal) FROM emp 
+        WHERE deptno = 30);
+-- 方法2
+SELECT * FROM emp 
+	WHERE sal > ALL(
+        SELECT sal FROM emp 
+        WHERE deptno = 30);
+```
 
 
 
+```mysql
+-- 显示工资比30号部门其中一个员工高的员工
+SELECT * FROM emp 
+	WHERE sal > ANY(
+        SELECT sal FROM emp 
+        WHERE deptno = 30);
+-- 同理可以使用MIN
+```
+
+- 多列子查询
+
+  查询返回多个列数据的子查询语句
+
+语法：
+
+(字段1，字段2... ) = (select 字段1，字段2... from)
+
+e.g.
+
+```mysql
+-- 如何查询与smith部门和岗位完全相同的所有员工，不包含smith本人
+/*
+	1.得到smith部门和岗位
+	2.把上述select语句当做子查询
+*/
+SELECT * FROM emp 
+	WHERE (deptno,job) IN(
+		SELECT deptno,job FROM emp 
+        WHERE ename = 'smith'
+) AND ename <> 'smith';
+```
+
+##### 合并查询
+
+- 介绍
+
+为了合并多个select语句的结果，可以使用集合操作符号
+
+- union all
+
+该操作符用于取得结果集的并集，**不会去除重复行**
+
+e.g.
+
+```MYSQL
+SELECT ename,sal,job FROM emp WHERE sal>5000
+UNION ALL -- 合并查询
+SELECT ename,sal,job FROM emp WHERE job='manager';
+```
+
+- union
+
+该操作符和union all相似，**但会去除结果中重复行**
+
+##### 外连接
+
+- 背景
+
+使用where子句对两张或多张表，形成笛卡尔集进行筛选，根据==关联条件==，显示所有匹配的记录
+
+e.g.
+
+```mysql
+-- 列出部门名称和这些部门的员工的名称和工作，并显示没有员工的部门
+-- 使用多表查询
+SELECT dname,ename,job FROM emp,dept
+	WHERE emp.deptno = dept.deptno -- 第二个要求无法完成
+```
+
+- 外连接
+
+1.左外连接（左侧的表完全显示）
+
+语法:`select...from 左表 left join 右表 on 条件;`
+
+2.右外连接（右侧的表完全显示）
+
+语法:`select...from 左表 right join 右表 on 条件;`
+
+e.g.
+
+```mysql
+/*
+	stu							exam
+	+------+------+				+------+-------+
+	| id   | grade |			| id   | name |
+	+------+------+				+------+-------+
+	|    1 | jack |				|    1 |    56 |
+	|    2 | tom  |				|    2 |    76 |
+	|    3 | kity |				|   11 |     8 |
+	|    4 | nono |				+------+-------+
+	+------+------+				
+*/
+-- 显示所有人成绩，即使没有成绩，也要显示该人的姓名和id，成绩显示为空
+SELECT `name`,stu.id,grade 
+	FROM stu LEFT JOIN exam -- 左外连接
+	ON stu.id = exam.id;
+-- 显示所有成绩，如果没有名字匹配显示空
+SELECT `name`,exam.id,grade
+	FROM stu RIGHT JOIN exam -- 右外连接
+	ON stu.id = exam.id;
+-- 右边的表和左表没有匹配的记录，也会把右表的记录显示出来
+```
+
+e.g.解决背景问题
+
+```mysql
+-- 左连接
+SELECT dname,ename,job
+	FROM dept LEFT JOIN emp
+	ON dept.deptno = emp.deptno;
+-- 右连接
+SELECT dname,ename,job 
+	FROM emp RIGHT JOIN dept
+	ON emp.deptno = dept.deptno;
+-- 左外连接和右外连接本质一样
+```
+
+**大多数情况下使用的是内连接**
+
+### 表复制
+
+- 自我复制数据（蠕虫复制）
+
+  有时为测试sql语句进行效率，我们需要海量数据，可以使用此方法为表创建海量数据
+
+```mysql
+-- 表的复制
+CREATE TABLE tab01(
+	id INT,
+    `name` VARCHAR(32),
+    `sal` double,
+    `job` VARCHAR(32),
+    deptno INT);
+
+-- 把emp表的记录复制到tab01
+INSERT INTO tab01
+	(id,`name`,sal,job,deptno)
+	SELECT empno,ename,sal,job,deptno FROM emp;
+
+-- 自我复制
+INSERT INTO tab01
+	SELECT * FROM tab01;
+```
+
+- 去重
+
+```mysql
+-- 以tab01为例
+/*
+	1.创建临时表tmp，结构与tab01相同
+	2.把tab01的记录通过distinct处理后添加到tmp中
+	3.删除tab01记录，添加tmp中的数据
+	4.删除临时表tmp
+*/
+CREATE TABLE tmp LIKE tab01;
+INSERT INTO tmp SELECT DISTINCT * FROM tab01;
+DELETE FROM tab01;
+INSERT INTO tab01 SELECT * FROM tmp;
+DROP TABLE tmp;
+```
+
+## 约束
+
+- 基本介绍
+
+约束用于确保数据库的数据满足特定的商业规则
+
+在mysql中，约束包括:**not null,unique,primary key,foreign key,check**共5种
+
+### 主键
+
+- 基本使用
+
+`字段名 字段类型 primary key -- 在定义表时`
+
+用于唯一表示表行的数据,定义约束主键后,==该列的值不能重复==
+
+e.g.
+
+```mysql
+CREATE TABLE t(
+    id int primary key, -- 表示id是主键
+    `name` varchar(32),
+    email varchar(32)
+);
+```
+
+- **使用细节**
+
+1.primary key不能重复且非空
+
+2.一张表中最多只能有一个主键,但可以是复合主键
+
+```mysql
+-- 演示复合主键使用
+CREATE TABLE test_tab(
+	id int,
+    `name` varchar(32),
+    email varchar(32),
+    primary key (id,`name`) -- 设置id和name为复合主键
+)
+```
+3.primary key指定方式有两种:
+  - 直接在字段名后指定:字段名 字段类型 primary key
+  - 在表定义最后指定:primary key(列名)
+
+4.使用desc可以查看primary key情况
+
+5.每个表往往都会设计一个primary key
+
+- 自增长
+
+`字段名 类型 primary key auto_increment`
+
+**细节**：
+
+1.添加记录时，该列从1开始自动的增长
+
+2.`alter table tab_name auto_increment = xxx;`也可以设置自增长为其他值
+
+3.设置自增长后该列可插入null(前提not null)，默认自增长；也可不添加该列的值
+
+4.一般而言自增长配合primary key使用，也可单独使用[但需要配合unique]
+
+5.自增长修饰的字段为整型
+
+6.添加数据时给定自增长字段某值，则以给定值为准；**自增长默认为最大值加1**
+
+### NOT NULL & UNIQUE
+
+- not null
+
+如果在某列上定义了not null,插入数据时,必须为该列提供数据
+
+`字段名 字段类型 not null`
+
+- unique(唯一)
+
+当定义了唯一约束,该列值不能重复
+
+`字段名 字段类型 unique`
+
+**细节**:
+
+1.如果没有指定not null,则unique字段可以有多个null
+
+2.一张表可以有多个unique字段
+
+### 外键
+
+用于定义主表和从表之间的关系:
+
+外键约束要定义在从表上,主表必须具有主键约束或unique约束;
+
+当定义外键约束后,要求外键列数据必须在主表的主键列存在或为null
+
+- 语法:
+
+`foreign key (本表字段名) references 主表名(主键名或unique字段)`
+
+ e.g.
+
+```mysql
+-- 创建主表my_class
+CREATE TABLE my_class(
+	id int PRIMARY KEY, -- 班级编号
+    `name` varchar(32) NOT NULL DEFAULT ''
+);
+-- 创建从表my_stu
+CREATE TABLE my_stu(
+	id int PRIMARY KEY, -- 学生编号
+    `name` varhcar(32) NOT NULL DEFAULT '',
+    class_id int,
+    FOREIGN KEY (class_id) REFERENCES my_class(id) -- 设置外键关系
+);
+```
+
+- 细节
+
+1.外键指向表的字段，要求是primary key或unique
+
+2.表的类型是==innodb==，否则不支持外键
+
+3.外键字段的类型要和主键字段**类型一致**（长度可不同）
+
+4.外键字段的值必须在主键字段中出现过或者为null[**前提是外键字段允许为null**]
+
+5.一旦建立主外键关系，数据就不能随意删除
+
+### CHECK
+
+用于强制行数据必须满足的条件
+
+- 提示
+
+oracle和sql server均支持check，==但mysql5.7目前还不支持check==，只做语法校验，但不会生效
+
+注：在mysql实现check功能，一般是在程序中控制，或者通过触发器完成
+
+- 语法
+
+`列名 类型 check(check条件)`
+
+e.g.
+
+```mysql
+CREATE TABLE check_tab(
+	id int PRIMARY KEY,
+    `name` varchar(32),
+    sex varchar(6) CHECK (sex IN ('man','woman')),
+    sal double CHECK (sal > 1000 AND sal < 2000)
+);
+```
+
+## 索引
+
+### 索引介绍
+
+索引能够**不加内存，不改程序，不调优sql**，提高数据库查询
+
+e.g.演示索引对查询的优化
+
+```mysql
+/*
+	emp表内存有8000000条记录
+*/
+mysql> select * from emp
+    -> where empno = 1234567;
++---------+--------+----------+-----+------------+---------+--------+--------+
+| empno   | ename  | job      | mgr | hiredate   | sal     | comm   | deptno |
++---------+--------+----------+-----+------------+---------+--------+--------+
+| 1234567 | yqlfVl | SALESMAN |   1 | 2022-02-17 | 2000.00 | 400.00 |    189 |
++---------+--------+----------+-----+------------+---------+--------+--------+
+1 row in set (2.77 sec) -- 未使用索引时select时间
+
+-- 未创建索引前，emp.ibd文件大小是524288kb
+mysql> create index emp_index on emp(empno); -- 建立索引
+-- emp_index索引名称
+-- on emp(empno)表示在emp表的empno列创建索引
+Query OK, 0 rows affected (11.18 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+-- 创建索引后，emp.ibd文件大小是655360kb[索引本身也会占用空间]
+mysql> select * from emp
+    -> where empno = 1234567;
++---------+--------+----------+-----+------------+---------+--------+--------+
+| empno   | ename  | job      | mgr | hiredate   | sal     | comm   | deptno |
++---------+--------+----------+-----+------------+---------+--------+--------+
+| 1234567 | yqlfVl | SALESMAN |   1 | 2022-02-17 | 2000.00 | 400.00 |    189 |
++---------+--------+----------+-----+------------+---------+--------+--------+
+1 row in set (0.01 sec) -- 索引优化后select时间(空间换时间)
+
+-- 创建索引后，只对创建索引的列的查询有效
+mysql> select * from emp
+    -> where ename = 'axJxC';
+Empty set (2.96 sec)
+```
+
+### 索引机制
+
+- 索引原理(简述)
+
+没有索引——全表扫描
+
+使用索引——形成索引的==数据结构==，比如二叉树
+
+- ==索引的代价==
+
+1.磁盘占用
+
+2.如果对表进行dml会对索引进行维护，影响效率
+
+### MySQL索引
+
+- 索引类型
+
+1.主键索引，==主键自动为索引==（类型primary key）
+
+2.唯一索引（unique）
+
+3.普通索引（index）
+
+4.全文索引（fulltext）[适用于MyISAM引擎]
+  一般开发不考虑使用MySQL自带的全文索引，而是使用：全文搜索Solr和ElasticSearch(ES)
+
+- 索引使用
+
+1.查询索引
+
+`SHOW INDEX FROM tab_name;` -- 查询tab表是否有索引
+
+2.添加索引
+
+`CREATE [UNIQUE] INDEX index_name ON tab_name(col_name[(length)] [ASC|DESC],...);` 
+
+`ALTER TABLE tab_name ADD INDEX [index_name] (index_col_name,...);`
 
 
 
