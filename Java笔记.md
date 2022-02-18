@@ -3379,7 +3379,6 @@ CREATE TABLE `user`(
 
 ```mysql
 { ADD COLUMN <列名> <类型>
-| CHANGE COLUMN <旧列名> <新列名> <新列类型>
 | ALTER COLUMN <列名> { SET DEFAULT <默认值> | DROP DEFAULT }
 | MODIFY COLUMN <列名> <类型>
 | DROP COLUMN <列名>
@@ -4294,13 +4293,356 @@ Empty set (2.96 sec)
 
 `SHOW INDEX FROM tab_name;` -- 查询tab表是否有索引
 
+`SHOW INDEXES FROM tab_name;`
+
+`SHOW KEYS FROM tab_name;`
+
+`DESC tab_name;` & `SHOW CREATE TABLE tab_name [\g |\G];`
+
 2.添加索引
 
 `CREATE [UNIQUE] INDEX index_name ON tab_name(col_name[(length)] [ASC|DESC],...);` 
 
-`ALTER TABLE tab_name ADD INDEX [index_name] (index_col_name,...);`
+`ALTER TABLE tab_name ADD [UNIQUE] INDEX [index_name] (col_name,...);`
+
+`ALTER TABLE tab_name ADD PRIMARY KEY (col_name);` -- 添加主键索引
+
+**使用primary key和unique约束自带索引**
+
+ 如果某列的值不会重复，优先考虑unique索引；否则使用普通索引
+
+3.删除索引
+
+`DROP INDEX index_name ON tab_name;`
+
+`ALTER TABLE tab_name DROP INDEX index_name;`
+
+`ALTER TABLE tab_name DROP PRIMARY KEY;` -- 删除主键索引
+
+在MySQL中修改索引可以通过删除原索引，再根据需要创建一个同名的索引，从而==实现修改索引的操作==
+
+4.修改索引名称
+
+`ALTER TABLE tab_name RENAME INDEX old_index_name TO new_index_name;`
+
+- 索引创建规则
+
+1.较频繁作为查询条件的字段应创建索引
+
+2.唯一性太差的字段不适合使用索引，即使频繁作为查询条件
+
+3.更新非常频繁的字段不适合创建索引
+
+4.不会出现在WHERE子句中的字段不该创建索引
+
+## 事务
+
+### 基本介绍
+
+- 概念
+
+事务用于保证数据的一致性，是由==一组相关的dml语句组成==；
+
+该组语句要么全部成功，要么全部失败
+
+- 事务和锁
+
+当执行事务操作时（dml语句），MySQL会在==表上加锁==，防止其他用户修改表的数据
+
+- 基本操作
+
+1.`start transaction`——开始事务
+
+2.`savepoint point_name`——设置保存点
+
+3.`rollback to point_name`——回退事务
+
+4.`rollback`——回退全部事务
+
+5.`commit`——提交事务，所有操作生效，**不能回退**
+
+e.g.
+
+```mysql
+-- 演示事务
+-- 1.创建测试表
+CREATE TABLE t(
+	id int,
+    `name` varchar(32)
+);
+
+-- 2.开启事务
+START TRANSACTION;
+-- 3.设置保存点a
+SAVEPOINT a;
+-- 执行dml操作
+INSERT INTO t VALUES(100.'tom');
+
+SAVEPOINT b;
+INSERT INTO t VALUES(200,'jack');
+
+-- 回退到b，jack记录消失
+ROLLBACK TO b;
+
+-- 结束事务
+COMMIT；
+
+-- 说明
+/*
+
+1.保存点是事务中的点，用于取消部分事务，当结束事务时（commit），会自动删除该事务所定义的所有保存点
+
+2.执行回退事务时，通过指定保存点可以回退到指定的点
+
+3.使用commit可以提交事务；当执行commit后，会确认事务变化、结束事务、删除保存点、释放锁并使数据生效；
+	当使用commit结束事务后，其他会话可以查看到变化后的新数据
+*/
+```
+
+- 细节
+
+1.如果不开事务，默认情况下dml操作自动提交，不能回滚
+
+2.开启一个事务但没有设置保存点，也可以使用rollback，默认回退到事务开始状态
+
+3.可以创建多个保存点
+
+4.MySQL事务机制需要使用innodb存储引擎，MyISAM不支持
+
+5.开始一个事务方式
+
+​	`START TRANSACTION;`
+
+​	`SET AUTOCOMMIT = OFF;`
+
+### 隔离
+
+- 介绍
+
+多个连接开启各自事务操作数据库数据时，数据库系统要负责隔离操作，**以保证各个连接在获取数据时的准确性**
 
 
+
+未引入隔离所导致的问题：
+
+​	1.脏读(dirty read)
+
+当一个事务读取上一个事务**未提交**的修改时，产生脏读
+
+​	2.不可重复读(nonrepeatable read)
+
+同一查询在同一事务中多次进行，由于其他**提交事务**所做的**修改或删除操作**，每次返回不同的结果集，此即发生不可重复读
+
+​	3.幻读(phantom read)
+
+同一查询在同一事务中多次进行，由于其他**提交事务**所做的**插入操作**，每次返回不同的结果集，此即发生幻读
+
+
+
+- 事务隔离级别
+
+概念:MySQL隔离级别定义了事务与事务之间的隔离程度
+
+|        MySQL隔离级别         | 脏读 | 不可重复读 | 幻读 |  加锁读  |
+| :--------------------------: | :--: | :--------: | :--: | :------: |
+|  读未提交(Read uncommitted)  |  √   |     √      |  √   |  不加锁  |
+| ==读已提交(Read committed)== |  ×   |     √      |  √   |  不加锁  |
+|  可重复读(Repeatable read)   |  ×   |     ×      |  ×   |  不加锁  |
+|  ==可串行化(Serializable)==  |  ×   |     ×      |  ×   | **加锁** |
+
+[^注]: √可能出现 ×不会出现
+
+附：[MySQL事务和锁分析](https://zhuanlan.zhihu.com/p/187345419)
+
+- 事务操作
+
+查看当前会话隔离级别:`SELECT @@tx_isolation;`
+
+查看系统当前隔离级别:`SELECT @@global.tx_isolation;`
+
+设置当前会话隔离级别:`SET SESSION TRANSACTION ISOLATION LEVEL 隔离级别;`
+
+设置系统当前隔离级别:`SET GLOBAL TRANSACTION ISOLATION LEVEL 隔离级别;`
+
+全局修改隔离级别修改在**my.ini配置文件**中:
+
+`[mysqld]
+ transaction-isolation = 隔离级别;`
+
+MySQL默认隔离级别是repeatable read，一般情况下无特殊需求，没必要修改
+
+### ACID说明
+
+1.原子性(Atomicity)
+
+原子性指事务是一个**不可分割的工作单位**，事务中的操作要么都发生，要么都不发生
+
+2.一致性(Consistency)
+
+事务必须从数据库中的**一个一致性状态变换到另一个一致性状态**（或指数据库的完整性约束没有被破坏，在事务执行前后都是合法的数据状态）
+
+3.隔离性(Isolation)
+
+**隔离性指的是多个事务彼此之间是完全隔离、互不干扰的**。隔离性的最终目的也是为了保证一致性
+
+4.持久性(Durability)
+
+持久性是指一个事务**一旦被提交，对数据库中数据改变是永久性的**，不可能因任何原因回到原来的状态
+
+## 表类型和存储引擎
+
+- 基本介绍
+
+1.MySQL表类型由存储引擎(Storage Engines)决定，主要包括MyISAM、InnoDB、Memory等
+
+2.MySQL数据表主要支持六种类型，分别是:CSV、Memory、ARCHIVE、MRG_MYISAM、MyISAM、InnoDB
+
+3.这六种又分类两大类：
+
+- 事务安全型:InnoDB
+- 其余都属于第二类，称为“非事务安全型”
+
+查看所有引擎:`SHOW ENGINES;`
+
+```mysql
++--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+| Engine             | Support | Comment                                                        | Transactions | XA   | Savepoints |
++--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+| InnoDB             | DEFAULT | Supports transactions, row-level locking, and foreign keys     | YES          | YES  | YES        |
+| MRG_MYISAM         | YES     | Collection of identical MyISAM tables                          | NO           | NO   | NO         |
+| MEMORY             | YES     | Hash based, stored in memory, useful for temporary tables      | NO           | NO   | NO         |
+| BLACKHOLE          | YES     | /dev/null storage engine (anything you write to it disappears) | NO           | NO   | NO         |
+| MyISAM             | YES     | MyISAM storage engine                                          | NO           | NO   | NO         |
+| CSV                | YES     | CSV storage engine                                             | NO           | NO   | NO         |
+| ARCHIVE            | YES     | Archive storage engine                                         | NO           | NO   | NO         |
+| PERFORMANCE_SCHEMA | YES     | Performance Schema                                             | NO           | NO   | NO         |
+| FEDERATED          | NO      | Federated MySQL storage engine                                 | NULL         | NULL | NULL       |
++--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+```
+
+- 主要存储引擎特点
+
+|     特点     | MyISAM | InnoDB |    Memory    |     Archive      |
+| :----------: | :----: | :----: | :----------: | :--------------: |
+| 批量插入速度 |   高   |   低   | 高(内存级别) | 非常高(存档类型) |
+|   事务安全   |        |  支持  |              |                  |
+|   全文索引   |  支持  |        |              |                  |
+|    锁机制    |  表锁  |  行锁  |     表锁     |       行锁       |
+|   存储限制   |  没有  |  64TB  |      有      |       没有       |
+|   B树索引    |  支持  |  支持  |     支持     |                  |
+|   哈希索引   |        |  支持  |     支持     |                  |
+|   集群索引   |        |  支持  |              |                  |
+|   数据缓存   |        |  支持  |     支持     |                  |
+|   索引缓存   |  支持  |  支持  |     支持     |                  |
+|  数据可压缩  |  支持  |        |              |       支持       |
+|   空间使用   |   低   |   高   |     N/A      |      非常低      |
+|   内存使用   |   低   |   高   |     中等     |        低        |
+|   支持外键   |        |  支持  |              |                  |
+
+- **细节说明**
+
+1.MyISAM不支持事务，不支持索引，但访问速度快，对事务完整性没有要求
+
+2.InnoDB提供具有提交、回滚和崩溃恢复能力的事务安全，但是比起MyISAM,InnoDB写的处理效率差并且会占用更多磁盘空间以保存数据和索引
+
+3.MEMORY使用内存创建表，每个MEMORY表实际对应一个磁盘文件；MEMORY类型的表访问非常快，因为数据放在内存中，并默认使用hash索引；但一旦MySQL服务关闭，表的结构还在，表中数据丢失
+
+- 如何使用存储引擎
+
+1.如果不需要事务，处理的只是基本的CRUD操作,使用MyISAM
+
+2.如果需要支持事务，使用InnoDB
+
+3.MEMORY就是将数据存储在内存中，由于没有磁盘I/O的等待，速度极快。但由于是内存存储引擎，任何修改在服务器重启后都将消失(经典用法：==用户在线状态==)
+
+## 视图
+
+- 基本概念
+
+视图是一个虚拟表，其内容由查询定义。同真实的表一样，视图包含列，其**数据来自于对应的真实表**(基表)
+
+- 视图和基表关系
+
+视图<--**^映射^**-->基表
+
+总结：
+
+1.视图是根据基表（可以是多个基表）来创建的，是虚拟的表
+
+2.==视图和基表是相互影响的==，一方的改变会导致另一方的改变
+
+- 基本使用
+
+`CREATE VIEW 视图名 AS select语句;`
+
+`ALTER VIEW 视图名 AS select语句;` -- 更新为新的视图
+
+`SHOW CREATE VIEW 视图名;`
+
+`DROP 视图名1,视图名2...;`
+
+e.g.
+
+```mysql
+-- 根据emp表创建emp_view，只能查询emp表的empno，ename，job和deptno
+CREATE VIEW emp_view AS
+	SELECT empno,ename,job,deptno
+	FROM emp;
+```
+
+- 细节
+
+1.创建视图后，到数据库查看，对应视图的只有一个视图**结构文件**(视图名.frm),并没有数据文件
+
+2.视图中可以使用视图，数据仍然来自基表
+
+- 视图特点
+
+1.**安全**
+
+一些数据表有重要信息，有些字段是保密的，不能让用户直接看到；这时可以创建一个视图，只保留部分字段
+
+2.**性能**
+
+关系数据库的数据常常会分表存储，使用外键建立这些表之间的关系；这时数据库查询通常会用到`JOIN`,但麻烦且效率低下；可以使用视图将相关的表和字段组合在一起，就可以避免使用`JOIN`查询数据
+
+3.**灵活**
+
+如果数据库中存在旧表将被废弃，但很多应用基于该表，不易修改；这时可以建立视图，表中数据直接映射到**新建的视图**，达到升级数据表的目的
+
+## MySQL管理
+
+### MySQL用户
+
+mysql中的用户，都存储在系统数据库mysql中的user表中
+
+```mysql
++-----------+---------------+-------------------------------------------+
+| host      | user          | authentication_string                     |
++-----------+---------------+-------------------------------------------+
+| localhost | root          | *346CD8B58B77A144CD09022BC11FC8C609F1C928 |
+| localhost | mysql.session | *THISISNOTAVALIDPASSWORDTHATCANBEUSEDHERE |
+| localhost | mysql.sys     | *THISISNOTAVALIDPASSWORDTHATCANBEUSEDHERE |
++-----------+---------------+-------------------------------------------+
+```
+
+- 重要字段说明
+
+1.host：允许登录位置，localhost表示该用户只允许本机登录，也可以指定ip地址
+
+2.user：用户名
+
+3.authentication_string：密码，已通过mysql的password()加密
+
+- 创建用户
+
+`CREATE USER '用户名'@'允许登录位置' IDENTIFIED BY '密码';`
+
+说明：创建用户，同时指定密码
+
+- 删除用户
+
+`DROP USER '用户名'@'允许登录位置';`
 
 
 
@@ -4313,6 +4655,7 @@ Empty set (2.96 sec)
 应用场景：在整个软件系统中，对某个类只能存在一个对对象实例，并且该类只提供一个获取其对象实例的方法
 
 1.饿汉式
+
 ```java
 class Single() {
 	private Single() {} //1.构造器私有化
