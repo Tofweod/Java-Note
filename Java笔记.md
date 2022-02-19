@@ -2367,30 +2367,6 @@ public class BufferedCopy {
 
 ### BufferInputStream&BufferedOutputStream
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #  网络编程
 
 ## 相关概念
@@ -4644,7 +4620,330 @@ mysql中的用户，都存储在系统数据库mysql中的user表中
 
 `DROP USER '用户名'@'允许登录位置';`
 
+不同的数据库用户，登录到DBMS后，根据相应的权限，可操作的数据库和数据对象（表，视图，触发器）都不一样
 
+- 修改密码
+
+`SET PASSWORD = PASSWORD(str);` -- 修改自己密码
+
+`SET PASSWORD FOR '用户名@登录位置' = PASSWORD(str);` -- 修改他人密码（需要有该用户权限）
+
+### MySQL权限
+
+- 给用户授权
+
+基本语法
+
+`grant 权限列表 on 库.对象名 to '用户名'@'登录位置' [identified by '密码'];`
+
+说明：
+
+1.多个权限可用逗号分开
+
+2.特别说明
+
+`*.*`:代表本系统中的所有数据库的所有数据对象（表，视图，存储过程等）
+
+`库.*`:代表某数据库中的所有数据对象（表，视图，存储过程等）
+
+3.identified by可以省略
+
+ (1)如果用户存在，就是修改用户密码
+
+ (2)如果用户不存在，就是创建该用户
+
+- 回收用户授权
+
+`revoke 权限列表 on 库.对象名 to '用户名'@'登录位置';`
+
+- 权限生效指令
+
+如果权限没有生效，可执行下面指令
+
+`flush privileges;`
+
+### 管理细节
+
+1.创建用户时，如果未指定host，则为%，%表示所有ip都有连接权限
+
+2.`create user 'xxx'@'192.168.1.%'`表示xxx用户在192.168.1.*的所有ip可以登录
+
+3.在删除用户时，如果host不是%，需要明确指定'用户名'@'host值'
+
+# JDBC和连接池
+
+## JDBC概述
+
+- 基本介绍
+
+1.JDBC为访问不同数据库提供了统一的接口，为使用者屏蔽了细节问题
+
+2.Java中使用JDBC,可以连接任何提供了JDBC驱动程序的数据库系统，从而完成对数据库的各种操作
+
+- JDBC原理图
+
+<img src='D:\JAVA\Note\src\JDBC\JDBC01.png'>
+
+- JDBC好处
+
+JDBC是Java提供的一套用于数据库操作的接口API，==Java程序员只需要面向这套接口编程即可==；不同的数据库厂商，需要针对这套接口提供不同的实现
+
+- JDBC API
+
+JDBC API是一系列接口，统一和规范了应用程序与数据库的连接、执行SQL语句、并得到返回结果等各类操作，相关类和接口在`java.sql`与`javax.sql`中
+
+<img src='D:\JAVA\Note\src\JDBC\JDBC02.png'  >
+
+
+
+## JDBC入门
+
+- JDBC程序编写步骤
+
+1.注册驱动——加载Driver类
+
+2.获取连接——得到Connection类
+
+3.执行CRUD——发送SQL语句给MySQL执行
+
+4.释放资源——关闭相关连接
+
+e.g.
+
+```java
+/*
+ 通过JDBC对db01中的表actor进行CRUD操作
+ 表结构：
+ +----------+-------------+------+-----+---------+----------------+
+ | Field    | Type        | Null | Key | Default | Extra          |
+ +----------+-------------+------+-----+---------+----------------+
+ | id       | int(11)     | NO   | PRI | NULL    | auto_increment |
+ | name     | varchar(32) | NO   |     |         |                |
+ | sex      | char(1)     | NO   |     | 女      |                |
+ | birthday | datetime    | YES  |     | NULL    |                |
+ | phone    | varchar(12) | YES  |     | NULL    |                |
+ +----------+-------------+------+-----+---------+----------------+
+*/
+public class jdbcExercise {
+  public static void main(String[] args) throws SQLException {
+
+    // 前置工作：在项目下将mysql.jar文件拷贝到libs目录，并添加到库
+
+    // 1.注册驱动 
+    Driver driver = new Driver(); // com.mysql.jdbc.Driver;
+
+    // 2.得到连接
+    /*
+      (1)jdbc:mysql:// 规定协议，表示通过jdbc的方式连接到mysql
+      (2)localhost 主机，可以是ip地址
+      (3)3306 表示mysql监听端口
+      (4)db02 表示连接到db01数据库
+     */
+    String url = "jdbc:mysql://localhost:3306/db01";
+
+    // 将用户名和密码封装到properties对象中
+    Properties properties = new Properties();
+    // user和password作为key是已规定的
+    properties.setProperty("user","用户");
+    properties.setProperty("password","密码");
+
+    // 获取连接
+    // connect对象既是java程序与mysqldbms的网络连接
+    Connection connect = driver.connect(url, properties); // java.sql.Connection;
+
+    // 3.执行CRUD
+    String sql = "insert into actor values(null,'jack','男','2000-11-11','123456789')";
+
+    // Statement是用于执行静态sql语句并返回其生成结果的对象
+    Statement statement = connect.createStatement(); // java.sql.Statement;
+    // 如果是dml语句，rows表示受影响行数
+    int rows = statement.executeUpdate(sql);
+
+    System.out.println(rows > 0 ? "执行成功" : "执行失败");
+
+    // 关闭连接
+    statement.close();
+    connect.close();
+  }
+}
+```
+
+## 连接数据库的方式
+
+- 方式1
+
+```java
+// 获取Driver实现类对象
+Driver driver = new Driver();
+
+String url = "jdbc:mysql://localhost:3306/数据库名";
+
+Properties info = new Properties();
+info.setProperty("user","用户");
+info.setProperty("password","密码");
+
+Connection connect = driver.connect(url,info);
+```
+
+缺陷：
+
+1.driver是`com.mysql.jdbc.Driver`第三方类
+
+2.静态加载，灵活性差，依赖性强
+
+- 方式2
+
+```java
+// 使用反射机制加载Driver对象
+Class<?> class = Class.forName("com.mysql.jdbc.Driver"); // 动态加载
+Driver driver = (Driver)class.newInstance();
+
+String url = "jdbc:mysql://localhost:3306/数据库名";
+
+Properties info = new Properties();
+info.setProperty("user","用户");
+info.setProperty("password","密码");
+
+Connection connect = driver.connect(url,info);
+```
+
+- 方式3
+
+```java
+// 使用DriverManager替换Driver进行统一管理
+/*
+ DriverManger是用于管理一组JDBC驱动程序的基本服务
+*/
+Class<?> class = Class.forName("com.mysql.jdbc.Driver"); // 动态加载
+Driver driver = (Driver)class.newInstance();
+
+String url = "jdbc:mysql://localhost:3306/数据库名";
+String user = "用户";
+String password = "密码";
+
+DriverManager.registerDriver(driver); // 注册与给定的驱动程序DriverManager
+Connection connect = DriverManager.getConnection(url,user,password);
+```
+
+- 方式4（推荐）
+
+```java
+// 使用Class.forName()自动完成注册驱动
+/*
+ 在加载Driver类时，完成注册
+ 源码：
+ static{
+ 	try {
+    	DriverManager.registerDriver(new Driver());
+ 	} catch (SQLException var1) {
+        throw new RuntimeException("Can't register driver!");
+ 	}
+ }
+*/
+Class.forName("com.mysql.jdbc.Driver"); // 动态加载
+
+String url = "jdbc:mysql://localhost:3306/数据库名";
+String user = "用户";
+String password = "密码";
+
+Connection connect = DriverManager.getConnection(url,user,password);
+```
+
+注：
+
+1.在mysql5.1.6之后可以无需`Class.forName("com.mysql.jdbc.Driver");`，但推荐写上
+
+2.从jdk1.5后使用了jdbc4，不再需要显示调用`Class.forName()`注册驱动而是自动调用驱动jar包下`META-INF\services\java.sql.Driver`文本中的类名称去注册
+
+- 方式5
+
+```java
+// 使用配置文件，连接更为灵活
+/*
+ url中的各值，如端口，数据库，用户名，密码等
+ 为了方便可以将其写入到.properties文件中，方便操作
+*/
+/*
+mysql.properties
+ user = root
+ password = 2002madlife
+ url = jdbc:mysql://localhost:3306/db01
+ driver = com.mysql.jdbc.Driver
+*/
+
+//通过properties对象获取配置文件信息
+Properties info = new Properties();
+info.load(new FileInputStream("src\\mysql.properties"));
+String user = info.getProperty("user");
+String password = info.getProperty("password");
+String url = info.getProperty("url");
+String driver = info.getProperty("driver");
+
+// 加载驱动
+Class.forName(driver);
+
+Connection connect = DriverManager.getConnection(url,user,password);
+```
+
+## ResultSet[结果集]
+
+- 基本介绍
+
+表示数据库结果集的数据表，通常通过执行dql语句生成
+
+ResultSet对象保持一个光标==指向其当前的数据行==；最初，光标位于第一行之前，next()方法将光标移动到下一行，并且在ResultSet对象没有更多行时返回false，可用while遍历结果集
+
+e.g.
+
+```java
+public class ResultSet_ {
+  public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
+    Properties info = new Properties();
+    info.load(new FileInputStream("src\\mysql.properties"));
+    String user = info.getProperty("user");
+    String password = info.getProperty("password");
+    String url = info.getProperty("url");
+    String driver = info.getProperty("driver");
+
+    // 加载驱动
+    Class.forName(driver);
+
+    // 得到连接
+    Connection connect = DriverManager.getConnection(url,user,password);
+
+    // 得到statement
+    Statement statement = connect.createStatement();
+
+    // 组织select语句
+    String sql = "select id,name,sex,birthday from actor";
+    ResultSet resultSet = statement.executeQuery(sql); // executeQuery()执行指定sql语句，该语句返回一个ResultSet对象
+
+    // 使用while取出数据
+    while (resultSet.next()) {
+      int id = resultSet.getInt(1); // 获取该行的第一列数据
+      String name = resultSet.getString(2);
+      String sex = resultSet.getString(3);
+      Date date = resultSet.getDate(4);
+      System.out.println(id + "\t" + name + "\t" + sex + "\t" + date);
+    }
+
+    // 关闭连接
+    resultSet.close();
+    statement.close();
+    connect.close();
+  }
+}
+```
+
+- 底层源码
+
+<img src='D:\JAVA\Note\src\JDBC\JDBC03.png'>
+
+`rows`——所有行
+
+`elementData`——行数据
+
+`internalRowData`——列数据
 
 
 
