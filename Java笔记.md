@@ -4945,6 +4945,252 @@ public class ResultSet_ {
 
 `internalRowData`——列数据
 
+## Statement
+
+### Statement和sql注入
+
+1.`Interface Statement`是接口类型，用于执行静态sql语句并返回其生成结果对象
+
+2.建立连接后，对数据库进行访问、执行命令或sql语句，可以通过
+
+ - Statement
+ - PreparedStatement[预处理]
+ - CallableStatement[存储过程]
+
+3.Statement对象执行sql语句，存在sql==注入风险==
+
+4.sql注入是利用某些系统没有对用户输入的数据进行充分检验，而在用户输入数据中注入非法sql语句段或命令，恶意攻击数据库
+
+e.g.01
+
+```mysql
+-- 演示sql注入
+-- 创建演示表
+create table admin(
+name varchar(32) not null unique,
+pwd varchar(32) not null default ''
+)character set utf8;
+
+-- 添加数据
+insert into admin values('jack','123');
+
+-- 查找某个管理是否存在
+select * from admin
+	where name = 'tom' and pwd = '123';
+	
+-- sql注入
+-- 输入用户名为 1' or
+-- 输入密码为 or '1'= '1
+select * from admin
+	where name = '1' or' and pwd = ' or '1'= '1'; -- '1' = '1' 永远成立，透露admin表信息
+```
+
+e.g.02
+```java
+// java显示sql注入
+public class SQLInjection {
+  public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
+    Scanner scanner = new Scanner(System.in);
+
+    // 让用户输入账户和密码
+    System.out.print("请输入用户名：");
+    String admin_name = scanner.nextLine(); //next()当接收到 空格或 '就表示结果，看到sql注入需要使用nextLine()
+    System.out.print("请输入密码：");
+    String admin_pwd = scanner.nextLine();
+     
+    
+    Properties info = new Properties();
+    info.load(new FileInputStream("src\\mysql.properties"));
+    String user = info.getProperty("user");
+    String password = info.getProperty("password");
+    String url = info.getProperty("url");
+    String driver = info.getProperty("driver");
+
+    Class.forName(driver);
+
+    Connection connect = DriverManager.getConnection(url,user,password);
+
+    Statement statement = connect.createStatement();
+
+    String sql = "selct * from admin where name = '" + admin_name + "' and pwd = '" + admin_pwd +"'";
+
+    ResultSet resultSet = statement.executeQuery(sql);
+
+    System.out.println(resultSet.next()? "登录成功" : "登陆失败");
+
+    resultSet.close();
+    statement.close();
+    connect.close();
+  }
+}
+/*
+运行结果：
+	请输入用户名：
+	1' or
+	请输入密码：
+	or '1' = '1
+	登录成功
+*/
+```
+
+
+
+5.要防范sql注入，只需要使用PreparedStatement(从Statement扩展而来)取代Statement
+
+### PreparedStatement
+
+- 基本介绍
+
+```java
+// 编写sql
+String sql = "select * from admin where name = ? and password = ?";
+```
+
+1.PreparedStatement执行sql语句中的参数可用`?`（**相当于占位符**）来表示，调用PreaparedStatement对象的`setXxx()`方法来设置这些参数
+
+2.`setXxx()`方法有两个参数，第一个参数设置sql语句中参数的索引（从1开始），第二个参数设置sql语句中参数的值
+
+3.调用`executeQuery()`,执行dql语句，返回resultset对象
+
+4.调用`executeUpdate()`,执行dml语句，返回受影响行数(int类型)
+
+- ==预处理好处==
+
+1.不再使用`+`拼接sql语句，减少语法错误
+
+2.**有效解决sql注入问题**
+
+3.大大减少编译次数，提高效率
+
+- 预处理查询
+
+e.g.(以sql注入为案例)
+
+```java
+// 组织sql语句，?相当于占位符
+String sql = "select * from admin where name = ? and pwd = ?";
+
+// 得到PreparedStatement对象
+PreparedStatement statement = connect.prepareStatement(sql);
+
+// 给?赋值
+statement.setString(1,admin_name);
+statement.setString(2,admin_pwd);
+
+ResultSet resultSet = statement.executeQuery(); // 调用sql参数会将占位符作为结果输入，报错
+
+System.out.println(resultSet.next()? "登录成功" : "登陆失败");
+
+resultSet.close();
+statement.close();
+connect.close();
+/*
+运行结果：
+	请输入用户名：1' or
+	请输入密码：or '1' = '1
+	登陆失败
+*/
+```
+
+- 预处理dml
+
+同预处理dql，使用`executeUpdate()`方法
+
+## JDBC API
+
+1.`DriverManager驱动管理类`——getConneciton(url,user,password)获取连接
+
+2.`Connection接口`——createStatement创建Statement对象
+                   PreparedStatement(sql)生成预处理对象
+
+3.`Statement接口`——executeUpdate(sql)执行dml语句，返回受影响行数
+   									executeQuery(sql)执行dql语句，返回resultset对象
+   									execute(sql)执行任意sql语句，返回boolean值
+                  
+4.`PreparedStatement接口`——executeUpdate()执行dml语句
+   													executeQuery()
+   													execute()
+  													setXxx(占位符索引,占位符值)
+  													setObject(占位符索引，占位符值)
+
+5.`ResultSet结果集`——next()向下移动一行，且如果没有下一行返回false
+                    previous()向上移动一行
+                    getXxx(列的索引|列名)，返回xxx类型
+                    getObject(列的索引|列名)，返回Object
+
+## JDBCUtils
+
+-  说明
+
+在JDBC操作中，获取连接和释放资源是经常使用到的，可以将其封装在JDBC连接的工具类JDBCUtils
+
+- 代码实现
+
+```java
+public class JDBCUtils {
+    // 定义相关属性
+    private static String url;
+    private static String user;
+    private static String password;
+    private static String driver;
+
+    // 属性初始化
+    static {
+        Properties info = null;
+        try {
+            info = new Properties();
+            info.load(new FileInputStream("src\\mysql.properties"));
+
+            // 读取相关属性值
+            url = info.getProperty("url");
+            user = info.getProperty("user");
+            password = info.getProperty("password");
+            driver = info.getProperty("driver");
+        } catch (IOException e) {
+            // 在实际开发中，可这样处理
+            // 1.将编译异常转成运行异常，throw掉
+            // 2.调用者可以选择捕获该异常，也可选择默认处理该异常
+            throw new RuntimeException(e);
+        }
+    }
+
+    // 连接数据库，返回Connection
+    public static Connection getConnection(String url, String driver,String user, String password) {
+        try {
+            return DriverManager.getConnection(url,user,password);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // 关闭相关资源
+    /*
+        1.ResultSet
+        2.Statement&PreparedStatement
+        3.Connection
+     */
+    public static void close(ResultSet resultSet, Statement statement,Connection connection) {
+        // 关闭顺序不能替换
+        try{
+            if (resultSet != null) {
+                resultSet.close();
+            }
+            if (statement != null) {
+                statement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+```
+
+
+
+
 
 
 # 设计模式
