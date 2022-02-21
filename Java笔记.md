@@ -5188,8 +5188,124 @@ public class JDBCUtils {
 }
 ```
 
+## JDBC事务
 
+- 基本介绍
 
+1.JDBC程序中当一个`Connection`对象创建时，默认情况是自动提交事务：每次执行一个sql语句是时，如果执行成功，就会向数据库自动提交，而不能回滚
+
+2.JDBC程序为了让多个sql**作为一个整体执行**，需要==使用事务==
+
+3.调用`Connection`的`setAutoCommit(false)`可以取消自动提交事务
+
+4.在所有sql语句都成功执行后，调用`commit()`方法提交事务
+
+5.在其中某个操作失败或出现异常时，调用`rollback()`方法回滚
+
+## 批处理
+
+- 基本介绍
+
+1.当需要成批插入或更新记录时，可以采用java的批量更新机制，这一机制允许多条语句一次性提交给数据库批量处理，通常情况下比单独提交处理更有效率
+
+2.JDBC的批量处理语句包括以下方法：
+
+​	`addBatch()`:添加需要批量处理的sql语句或参数
+
+​	`executeBatch()`:执行批量处理语句
+
+​	`clearBatch()`:清空批处理包的语句
+
+3.JDBC连接MySQL中，如果要使用批处理，需要在url中加入参数`?rewriteBatchedStatements=true`
+
+4.批处理往往和PreparedStatement搭配使用，既可以减少编译次数，也可以运行次数，效率大大提升
+
+e.g.
+
+```java
+// 演示向admin表添加5000条数据，查看运行时间
+public class Batch_ {
+
+    // 传统方法
+    @Test
+    public void norBatch() throws SQLException {
+        Connection connection = JDBCUtils.getConnection();
+        String sql = "insert into admin01 values (null,?,?)";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        System.out.println("开始执行。。。");
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 5000; i++) {
+            statement.setString(1,"jack"+i);
+            statement.setString(2,"114514");
+            statement.executeUpdate();
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("传统执行时间为："+(double)(end-start)/1000+"秒");
+        JDBCUtils.close(null,statement,connection);
+    }
+
+    // 批处理
+    @Test
+    public void batch() throws SQLException{
+        /*
+            配置文件：url = jdbc:mysql://localhost:3306/db01?rewriteBatchedStatements=true
+         */
+        Connection connection = JDBCUtils.getConnection();
+        String sql = "insert into admin02 values (null,?,?)";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        System.out.println("开始执行。。。");
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 5000; i++) {
+            statement.setString(1,"jack"+i);
+            statement.setString(2,"114514");
+
+            // 将sql语句加入批处理包
+            statement.addBatch();
+
+            // 每有1000条记录时在批量执行
+            if ((i+1)%1000 == 0) {
+                statement.executeBatch();
+
+                // 清空批处理包
+                statement.clearBatch();
+            }
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("批量执行时间为："+(double)(end-start)/1000+"秒");
+        JDBCUtils.close(null,statement,connection);
+    }
+}
+/*
+运行结果：
+	开始执行。。。
+	传统执行时间为：3.341秒
+	开始执行。。。
+	批量执行时间为：0.085秒
+*/
+```
+
+- 源码
+
+```java
+  public void addBatch() throws SQLException {
+        if (this.batchedArgs == null) {
+            this.batchedArgs = new ArrayList(); // 第一次创建ArrayList-elementData => Object[]
+        }
+
+		// 简直sql语句中占位符是否合法
+        this.batchedArgs.add(new PreparedStatement.BatchParams(this.parameterValues, this.parameterStreams, this.isStream, this.streamLengths, this.isNull));
+    }
+```
+
+![](D:\JAVA\Note\src\JDBC\JDBC04.png)
+
+说明：1.byte数组`parameterStrings`即为setXxx()值
+
+​			2.ArrayList类型的`batchedArgs`会扩容
+
+​			3.批量处理会减少sql语句发送的网络开销，并减少运行次数
+
+## JDBC连接池
 
 
 
