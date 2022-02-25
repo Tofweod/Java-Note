@@ -1,4 +1,4 @@
-# 面向对象编程OOP
+面向对象编程OOP
 
 面向对象直观理解<https://blog.csdn.net/ThinkWon/article/details/100667386>
 
@@ -2943,7 +2943,7 @@ method.invoke(obj);
 cat对象 ---> 类型Person类
 cls对象 ---> 类型Class类
 
-![](D:\JAVA\Note\src\Reflection\Reflection01.png)
+!![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/Reflection/Reflection01.png)(D:\JAVA\Note\src\Reflection\Reflection01.png)
 
 作用：反射就是将类别的各个组成部分进行剖析，**可以得到每个组成部分，就可以对每一部分进行操作**。在比较复杂的程序或框架中来使用反射技术，可以简化代码提高程序的复用性
 
@@ -3127,9 +3127,9 @@ public static void m3(){
 
   **类加载过程图**
 
-<img src="D:\Java\Note\src\Reflection\Reflection02.png" style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/Reflection/Reflection02.png" style="zoom: 60%;" />
 
-<img src="D:\Java\Note\src\Reflection\Reflection03.png" style="zoom: 60%;"/>
+<img src="https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/Reflection/Reflection03.png" style="zoom:70%;" />
 
 - 加载阶段
   JVM在该阶段的主要目的是将字节码从不同的数据源（class文件，jar包，甚至网络）转化为二进制字节流加载到内存中，并生成一个代表该类的`java.lang.Class`对象
@@ -3254,7 +3254,7 @@ class Person{
 
 - 数据库管理系统、数据库和表关系示意图
 
-<img src="D:\Java\Note\src\MySQL\MySQL01.png">
+![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/MySQL/MySQL01.png)
 
 ==数据库-表的本质仍然是文件==
 
@@ -4682,7 +4682,7 @@ mysql中的用户，都存储在系统数据库mysql中的user表中
 
 - JDBC原理图
 
-<img src='D:\JAVA\Note\src\JDBC\JDBC01.png'>
+![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC01.png)
 
 - JDBC好处
 
@@ -4692,7 +4692,7 @@ JDBC是Java提供的一套用于数据库操作的接口API，==Java程序员只
 
 JDBC API是一系列接口，统一和规范了应用程序与数据库的连接、执行SQL语句、并得到返回结果等各类操作，相关类和接口在`java.sql`与`javax.sql`中
 
-<img src='D:\JAVA\Note\src\JDBC\JDBC02.png'  >
+![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC02.png)
 
 
 
@@ -4937,7 +4937,7 @@ public class ResultSet_ {
 
 - 底层源码
 
-<img src='D:\JAVA\Note\src\JDBC\JDBC03.png'>
+![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC03.png)
 
 `rows`——所有行
 
@@ -5297,7 +5297,7 @@ public class Batch_ {
     }
 ```
 
-![](D:\JAVA\Note\src\JDBC\JDBC04.png)
+![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC04.png)
 
 说明：1.byte数组`parameterStrings`即为setXxx()值
 
@@ -5306,6 +5306,556 @@ public class Batch_ {
 ​			3.批量处理会减少sql语句发送的网络开销，并减少运行次数
 
 ## JDBC连接池
+
+### 概述
+
+- 问题引入
+
+```java
+public class ConQuestion {
+
+  @Test
+  public void testCon() {
+    long start = System.currentTimeMillis();
+    for (int i = 0; i < 5000; i++) {
+      Connection connection = JDBCUtils.getConnection();
+      JDBCUtils.close(null,null,connection);
+    }
+    long end = System.currentTimeMillis();
+    System.out.println("传统方式5000次 耗时="+ (end-start));
+  }
+}
+/*
+运行结果
+	传统方式5000次 耗时=11794
+*/
+```
+
+问题分析：
+
+1.传统JDBC数据库连接使用DriverManager来获取，每次向数据库建立连接时都要将Connection加载到内存中，再==验证ip地址，用户名和密码==（0.05~1s）。需要数据库连接时，就向数据库要求一个，频繁进行数据库连接操作将占用很多系统资源，容易造成数据库崩溃
+
+2.每次数据库连接，使用完都需要断开，如果程序出现异常而未能关闭，将导致数据库==内存泄漏==，最终导致重启数据库
+
+3.传统获取连接方式，不能控制创建连接的数量，如果连接过多，也可能导致内存泄漏，MySQL崩溃
+
+4.解决传统的数据库连接问题，可以采用数据库连接池技术
+
+- 数据库连接池基本介绍
+
+1.预先在缓冲池中放入一定数量的连接，当需要建立数据库连接时，只需从”缓冲池“中取出，用完后再放回即可（**取消引用**）
+
+2.数据库连接池负责分配、管理和释放数据库连接，它允许应用程序==重复使用==一个现有的数据库连接，而不是重新建立一个
+
+3.当应用程序向连接池请求的连接数超过最大连接数时，这些请求连接将被加入到等待队列
+
+- 数据库连接池种类
+
+JDBC的数据库连接池使用`javax.sql.DataSource`来表示，`DataSource`只是一个接口，该接口通常由第三方提供实现[提供相应jar包]
+
+1.==C3P0==数据库连接池，速度相对较慢，稳定性不错
+
+2.DBCP数据库连接池，速度相对c3p0较快，但不稳定
+
+3.Proxool数据库连接池，有监控连接池状态的功能，稳定性较c3p0差一些
+
+4.BoneCP数据库连接池，速度快
+
+5.==Druid==(德鲁伊)是阿里提供的一套数据库连接池技术，集DBCP,C3P0,Proxool优点于一身
+
+### C3P0
+
+e.g.使用代码实现C3P0数据库连接池，配置文件放在src目录下
+
+- 方式1
+
+```java
+// 相关参数，在程序中指定url，user，password
+public class c3p0_01 {
+	public static void main(String[] args) throws IOException, PropertyVetoException, SQLException{
+        // 1.创建一个数据源对象
+        ComboPooledDataSource comboPooledDataSource = new ComboPooledDataSource();
+
+        // 2.通过配置文件mysql.properties获取相关信息
+        Properties info = new Properties();
+        info.load(new FileInputStream("src\\mysql.properties"));
+
+        // 读取相关属性值
+        String url = info.getProperty("url");
+        String user = info.getProperty("user");
+        String password = info.getProperty("password");
+        String driver = info.getProperty("driver");
+
+        // 给数据源设置相关参数
+        // 连接管理是由comboPooledDataSource完成的
+        comboPooledDataSource.setDriverClass(driver);
+        comboPooledDataSource.setJdbcUrl(url);
+        comboPooledDataSource.setUser(user);
+        comboPooledDataSource.setPassword(password);
+
+        // 设置初始化连接数
+        comboPooledDataSource.setInitialPoolSize(10);
+        // 设置最大连接数
+        comboPooledDataSource.setMaxPoolSize(50);
+        // 测试连接池效率
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 5000; i++) {
+            Connection connection = comboPooledDataSource.getConnection(); // 该方法从Datasource接口实现
+        	/*
+            代码实现
+         	*/
+            connection.close(); // 关闭程序与数据池的连接，而不是关闭connection的连接
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("c3p0 5000次连接数据库耗时：" + (end - start));
+        /*
+    	运行结果
+    		c3p0 5000次连接数据库耗时：226
+    	*/
+   }
+}
+```
+
+- 方式2
+
+e.g.使用配置文件模板完成连接
+
+```xml
+<c3p0-config>
+    <!-- 连接池名称 -->
+  <named-config name="hello"> 
+<!-- 驱动类 -->
+  <property name="driverClass">com.mysql.jdbc.Driver</property>
+  <!-- url-->
+  	<property name="jdbcUrl">jdbc:mysql://127.0.0.1:3306/database_name</property>
+  <!-- 用户名 -->
+  		<property name="user">user</property>
+  		<!-- 密码 -->
+  	<property name="password">password</property>
+  	<!-- 每次增长的连接数-->
+    <property name="acquireIncrement">5</property>
+    <!-- 初始的连接数 -->
+    <property name="initialPoolSize">10</property>
+    <!-- 最小连接数 -->
+    <property name="minPoolSize">5</property>
+   <!-- 最大连接数 -->
+    <property name="maxPoolSize">50</property>
+
+	<!-- 可连接的最多的命令对象数(Statement) -->
+    <property name="maxStatements">5</property> 
+    
+    <!-- 每个连接对象可连接的最多的命令对象数 -->
+    <property name="maxStatementsPerConnection">2</property>
+  </named-config>
+</c3p0-config>
+```
+
+```java
+public class c3p0_02{
+    public static void main(String[] args) throws SQLException{
+        // 1.将c3p0提供的c3p0-config.xml拷贝到src目录下
+        //   该文件制定了连接数据库和连接池的相关参数
+        ComboPooledDataSource comboPooledDataSource = new ComboPooledDataSource("hello");
+
+        // 2.直接连接
+        Connection connection = comboPooledDataSource.getConnection();
+        System.out.println("连接成功");
+        connection.close();
+	}
+}
+```
+
+### 德鲁伊
+
+- 德鲁伊连接池
+
+配置文件
+
+```properties
+#key=value
+driverClassName=com.mysql.jdbc.Driver
+url=jdbc:mysql://localhost:3306/database_name?rewriteBatchedStatements=true
+#url=jdbc:mysql://localhost:3306/girls
+username=user
+password=password
+#initial connection Size
+initialSize=10
+#min idle(空闲的) connecton size
+minIdle=5
+#max active connection size
+maxActive=20
+#max wait time (milseconds)
+maxWait=5000
+```
+
+程序实现
+
+```java
+public class druid_ {
+
+    @Test
+    public void testDruid() throws Exception {
+        // 1.加入Druid jar包
+
+        // 2.加入配置文件druid.properties至src目录
+
+        // 3.创建properties读取配置文件
+        Properties info = new Properties();
+        info.load(new FileInputStream("src\\druid.properties"));
+
+        // 4.创建一个指定参数的Druid连接池
+        DataSource dataSource = DruidDataSourceFactory.createDataSource(info);
+
+        // 测试效率
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 5000; i++) {
+            // 获得连接
+            Connection connection = dataSource.getConnection();
+            connection.close();
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("druid连接池耗时：" + (end - start));
+    }
+}
+/*
+运行结果
+	druid连接池耗时：360
+*/
+```
+
+- 德鲁伊工具类
+
+e.g.基于Druid改进UDBCUtils
+
+```java
+public class JDBCUtilsByDruid {
+  private static Properties info = null;
+  private static DataSource dataSource = null;
+
+  static {
+
+    try {
+      info = new Properties();
+      info.load(new FileInputStream("src\\druid.properties"));
+      dataSource = DruidDataSourceFactory.createDataSource(info);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  public static Connection getConnection() {
+    try {
+      return dataSource.getConnection();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  // 在连接池技术中，close不是真的断开连接，而是把使用的Connection对象返回连接池
+  public static void close(ResultSet resultSet, Statement statement, Connection connection) {
+    // 关闭顺序不能替换
+    try{
+      if (resultSet != null) {
+        resultSet.close();
+      }
+      if (statement != null) {
+        statement.close();
+      }
+      if (connection != null) {
+        connection.close();
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+}
+```
+
+### Apache—DBUtils
+
+- 问题引入
+
+1.关闭connection后，resultset结果集无法使用
+
+2.resultset不利于数据的管理[只能使用一次]
+
+3.使用返回信息不方便
+
+- 优化
+
+e.g.普通方法封装resultset
+
+```java
+// 将resultset封装到arraylist中
+public ArrayList<Actor> testSelectToArraylist() {
+   Connection connection = null;
+   String sql = "select * from actor where id >= ?";
+   PreparedStatement preparedStatement = null;
+   ResultSet set = null;
+   ArrayList<Actor> list = new ArrayList<>();
+   try {
+     connection = JDBCUtils.getConnection();
+     preparedStatement = connection.prepareStatement(sql);
+     preparedStatement.setInt(1,1);
+     set = preparedStatement.executeQuery();
+
+     while (set.next()) {
+       int id = set.getInt("id");
+       String name = set.getString("name");
+       String sex = set.getString("sex");
+       Date birthday = set.getDate("birthday");
+       String phone = set.getString("phone");
+       // 把得到的set记录封装到actor对象，放入到list集合
+       list.add(new Actor(id,name,sex,birthday,phone));
+     }
+     System.out.println(list);
+   } catch (SQLException e) {
+      e.printStackTrace();
+   } finally {
+     JDBCUtils.close(set,preparedStatement,connection);
+   }
+    
+   // list和connection没有关联，所有该集合可以复用
+   return list;
+}
+```
+
+- Apache—DBUtils
+
+基本介绍：
+
+`commons-dbutils`是Apache组织提供的一个开源的JDBC工具类库，是对JDBC的封装，使用dbutils能极大简化jdbc编码工作量
+
+- DButils
+
+1.`QueryRunner类`：该类封装了sql的执行，是线程安全的；实现了CRUD和批处理
+
+2.`ResultSetHandler接口`：该接口用于处理`java.sql.ResultSet`，将数据按照要求转换为另一种形式
+
+​	该接口常用方法：
+
+​	`ArrayHandler`：把结果集中的第一行数据转换为对象数组
+
+​	`ArrayListHandler`：把结果集中的每一行数据都转换为一个数组，再存放在List中
+
+​	`BeanHandler`：将结果集中的第一行数据封装到一个对应的`JavaBean`实例中
+
+​	`BeanListHandler`：将结果集的每一行数据都封装到一个对应的对应的`JavaBean`实例中，存放在List中
+
+​	`ColumnListHandler`：将结果集中的某一列数据存放到List中
+
+​	`KeyedHandler(name)`：将结果集中的每一行都封装到Map中，再把这些map再存放到一个map中，其key为指定的key
+
+​	`MapHandler`：将结果集的第一行数据封装到一个Map中，key是列名，value是对应值
+
+​	`MapListHandler`：将结果集中的每一行都封装到一个Map中，然后再存放到List
+
+e.g.
+
+```java
+public class DBUtils_USE {
+  @Test
+  public void testQueryMany() throws SQLException { // 返回结果是多行情况
+
+    Connection connection = JDBCUtilsByDruid.getConnection();
+
+    // 使用DBUtils类和接口，先引入jar文件
+
+    // 创建QueryRunner对象
+    QueryRunner queryRunner = new QueryRunner();
+
+    // 执行相关方法，返回arraylist结果集
+    String sql = "select * from actor where id >= ?";
+    /*
+      1.query()方法执行sql语句得到resultset，将其封装到arraylist集合中,并返回集合
+      2.connection:连接
+      3.sql:执行sql语句
+      4.new BeanListHandler<>(Actor.class):在将resultset-> Actor对象->封装到Arraylist中
+        底层使用反射机制获取Actor类属性然后进行封装
+      5.1:为sql语句中问号赋值，可以有多个
+      6.底层得到的resultset方法会在该方法关闭,还会关闭preparedstatement
+     */
+    List<Actor> list = queryRunner.query(connection, sql, new BeanListHandler<>(Actor.class),1);
+
+    // 输出集合信息
+    for (Actor actor: list) {
+      System.out.print(actor);
+    }
+
+    // 释放资源，只用关闭connection
+    JDBCUtilsByDruid.close(null,null,connection);
+  }
+    
+  @Test
+  public void testQuerySingle() throws SQLException { // 返回结果是单行情况
+      
+    Connection connection = JDBCUtilsByDruid.getConnection();
+
+    // 创建QueryRunner对象
+    QueryRunner queryRunner = new QueryRunner();
+
+    String sql = "select * from actor where id = ?";
+
+    // 因为返回单行记录<--->单个记录，所以使用BeanHandler
+    Actor actor = queryRunner.query(connection, sql, new BeanHandler<>(Actor.class), 5);
+
+    // 输出查询结果
+    System.out.println(actor);
+
+    JDBCUtilsByDruid.close(null,null,connection);
+  }
+    
+  @Test
+  public void testScalar() throws SQLException { // 返回结果单行单列
+
+    Connection connection = JDBCUtilsByDruid.getConnection();
+
+    QueryRunner queryRunner = new QueryRunner();
+
+    // 执行相关sql，返回单行单列
+    String sql = "select birthday from actor where id = ?";
+
+    // 因为返回单行单列<--->单个对象，所以使用scalarhandler
+    Object obj = queryRunner.query(connection, sql, new ScalarHandler(), 1);
+
+    System.out.println(obj);
+
+    JDBCUtilsByDruid.close(null,null,connection);
+  }
+    
+  @Test
+  public void testDML() throws SQLException { // apache-utils配合druid执行dml
+
+    Connection connection = JDBCUtilsByDruid.getConnection();
+
+    QueryRunner queryRunner = new QueryRunner();
+
+    String sql = "update actor set name = ? where id = ?";
+
+    /*
+      1.执行dml语句(update,insert,delete)使用update方法(不仅仅局限与update)
+      2.返回受影响行数
+     */
+    int affectedRows = queryRunner.update(connection, sql,  "john",1);
+
+    System.out.println(affectedRows > 0 ? "执行成功" : "执行未产生影响");
+
+    JDBCUtilsByDruid.close(null,null,connection);
+  }
+}
+```
+
+- 源码
+
+```java
+public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
+	PreparedStatement stmt = null;
+    ResultSet rs = null;
+    Object result = null; // ArrayList，[Object引用可以指向任何一个实例]
+
+    try {
+        stmt = this.prepareStatement(conn, sql); // 创建statement
+        this.fillStatement(stmt, params); // 将参数赋值给sql中的?占位符
+        rs = this.wrap(stmt.executeQuery()); // 执行sql语句
+        result = rsh.handle(rs); // 将resultset处理后赋值给result
+    } catch (SQLException var33) {
+        this.rethrow(var33, sql, params);
+    } finally {
+        try {
+            this.close(rs); // 关闭resultset
+        } finally {
+            this.close((Statement)stmt); // 关闭preparestatement
+        }
+    }
+
+    return result;
+}
+```
+
+- 表和JavaBean的类型映射关系
+
+![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC05.png)
+
+## DAO
+
+### BasicDAO
+
+- 问题分析
+
+apache-utlis和druid简化了JDBC开发，但仍有不足
+
+1.sql语句是固定的，不能通过参数传入，通用性不好
+
+2.对于select操作，如果有返回值，返回类型不能固定，需要使用泛型
+
+3.未来操作的表增多，业务需求复杂，不可能只靠一个Java类完成
+
+- BasicDAO示意图
+
+![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC06.png)
+
+### DAO
+
+DAO (DataAccessObjects 数据存取对象)是指位于业务逻辑和持久化数据之间实现对持久化数据的访问。通俗来讲，就是将数据库操作都封装起来。
+
+**对外提供相应的接口**
+
+在面向对象设计过程中，有一些"套路”用于解决特定问题称为模式。
+
+DAO 模式提供了访问关系型数据库系统所需操作的接口，将数据访问和业务逻辑分离对上层提供面向对象的数据访问接口。
+
+从以上 DAO 模式使用可以看出，DAO 模式的优势就在于它实现了两次隔离。
+
+- 1、隔离了数据访问代码和业务逻辑代码。业务逻辑代码直接调用DAO方法即可，完全感觉不到数据库表的存在。分工明确，数据访问层代码变化不影响业务逻辑代码,这符合**单一职能**原则，降低了藕合性，提高了可复用性。
+- 2、隔离了不同数据库实现。采用面向接口编程，如果底层数据库变化，如由 MySQL 变成 Oracle 只要增加 DAO 接口的新实现类即可，原有 MySQ 实现不用修改。这符合 **"开-闭"** 原则。该原则降低了代码的藕合性，提高了代码扩展性和系统的可移植性。
+
+**一个典型的DAO 模式主要由以下几部分组成。**
+
+-  1、DAO接口： 把对数据库的所有操作定义成抽象方法，可以提供多种实现。
+-  2、DAO 实现类： 针对不同数据库给出DAO接口定义方法的具体实现。
+-  3、实体类：用于存放与传输对象数据。
+-  4、数据库连接和关闭工具类： 避免了数据库连接和关闭代码的重复使用，方便修改。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
