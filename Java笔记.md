@@ -1,4 +1,4 @@
-面向对象编程OOP
+# 面向对象编程OOP
 
 面向对象直观理解<https://blog.csdn.net/ThinkWon/article/details/100667386>
 
@@ -214,8 +214,9 @@ jdk7及其以后类变量存放在class实例中，而class对象在GC堆中
    - 使用类的静态成员时
 
  3.普通代码块被创建一次就调用一次，只是使用类的静态成员则不会执行
- 4.静态代码块和金泰属性初始化调用优先级一样，按定义顺序调用（普通代码块和普通方法同理）
+ 4.静态代码块和静态属性初始化调用优先级一样，按定义顺序调用（普通代码块和普通方法同理）
  5.构造器最前面隐藏了两个语句
+
 ```java
 class A{
 	public A(){
@@ -2943,7 +2944,7 @@ method.invoke(obj);
 cat对象 ---> 类型Person类
 cls对象 ---> 类型Class类
 
-!![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/Reflection/Reflection01.png)(D:\JAVA\Note\src\Reflection\Reflection01.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/Reflection/Reflection01.png)
 
 作用：反射就是将类别的各个组成部分进行剖析，**可以得到每个组成部分，就可以对每一部分进行操作**。在比较复杂的程序或框架中来使用反射技术，可以简化代码提高程序的复用性
 
@@ -3127,9 +3128,9 @@ public static void m3(){
 
   **类加载过程图**
 
-<img src="https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/Reflection/Reflection02.png" style="zoom: 60%;" />
+<img src="https://github.com/Tofweod/NoteImg/raw/main/src/Reflection/Reflection02.png" style="zoom:60%;" />
 
-<img src="https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/Reflection/Reflection03.png" style="zoom:70%;" />
+<img src="https://github.com/Tofweod/NoteImg/raw/main/src/Reflection/Reflection03.png" style="zoom:80%;" />
 
 - 加载阶段
   JVM在该阶段的主要目的是将字节码从不同的数据源（class文件，jar包，甚至网络）转化为二进制字节流加载到内存中，并生成一个代表该类的`java.lang.Class`对象
@@ -3254,7 +3255,7 @@ class Person{
 
 - 数据库管理系统、数据库和表关系示意图
 
-![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/MySQL/MySQL01.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/MySQL/MySQL01.png)
 
 ==数据库-表的本质仍然是文件==
 
@@ -4682,7 +4683,7 @@ mysql中的用户，都存储在系统数据库mysql中的user表中
 
 - JDBC原理图
 
-![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC01.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC01.png)
 
 - JDBC好处
 
@@ -4692,7 +4693,7 @@ JDBC是Java提供的一套用于数据库操作的接口API，==Java程序员只
 
 JDBC API是一系列接口，统一和规范了应用程序与数据库的连接、执行SQL语句、并得到返回结果等各类操作，相关类和接口在`java.sql`与`javax.sql`中
 
-![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC02.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC02.png)]()
 
 
 
@@ -4937,7 +4938,7 @@ public class ResultSet_ {
 
 - 底层源码
 
-![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC03.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC03.png)
 
 `rows`——所有行
 
@@ -5292,12 +5293,12 @@ public class Batch_ {
             this.batchedArgs = new ArrayList(); // 第一次创建ArrayList-elementData => Object[]
         }
 
-		// 简直sql语句中占位符是否合法
+		// 检测sql语句中占位符是否合法
         this.batchedArgs.add(new PreparedStatement.BatchParams(this.parameterValues, this.parameterStreams, this.isStream, this.streamLengths, this.isNull));
     }
 ```
 
-![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC04.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC04.png)
 
 说明：1.byte数组`parameterStrings`即为setXxx()值
 
@@ -5697,7 +5698,7 @@ public class DBUtils_USE {
 
     String sql = "select * from actor where id = ?";
 
-    // 因为返回单行记录<--->单个记录，所以使用BeanHandler
+    // 因为返回单行记录<--->单个对象，所以使用BeanHandler
     Actor actor = queryRunner.query(connection, sql, new BeanHandler<>(Actor.class), 5);
 
     // 输出查询结果
@@ -5775,7 +5776,7 @@ public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object.
 
 - 表和JavaBean的类型映射关系
 
-![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC05.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC05.png)
 
 ## DAO
 
@@ -5793,9 +5794,9 @@ apache-utlis和druid简化了JDBC开发，但仍有不足
 
 - BasicDAO示意图
 
-![](https://raw.githubusercontent.com/Tofweod/NoteImg/main/src/JDBC/JDBC06.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC06.png)
 
-### DAO
+- 基本说明
 
 DAO (DataAccessObjects 数据存取对象)是指位于业务逻辑和持久化数据之间实现对持久化数据的访问。通俗来讲，就是将数据库操作都封装起来。
 
@@ -5817,45 +5818,552 @@ DAO 模式提供了访问关系型数据库系统所需操作的接口，将数�
 -  3、实体类：用于存放与传输对象数据。
 -  4、数据库连接和关闭工具类： 避免了数据库连接和关闭代码的重复使用，方便修改。
 
+### BasicDAO简单设计
+
+注：数据库连接和关闭工具类使用之前的JDBCUtils
+
+**BasicDAO**
+
+```java
+public class BasicDAO<T> { // 泛型指定具体类型
+
+    private QueryRunner qr = new QueryRunner();
+
+    // 开发通用dml方法,针对任意表
+    public int update(String sql,Object... params) {
+
+        Connection connection = null;
+
+        try {
+            connection = getConnection();
+            return qr.update(connection, sql, params);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close(connection);
+        }
+    }
+
+    /**
+     * 查询多行记录(即多个对象)，针对任意表
+     * @param sql sql语句，使用?
+     * @param clazz 传入一个类的class对象
+     * @param params 传入?具体的值
+     * @return 根据clazz类型返回对应arraylist集合
+     */
+    public List<T> queryMulti(String sql,Class<T> clazz, Object... params) {
+
+        Connection connection = null;
+
+        try {
+            connection = getConnection();
+            return qr.query(connection,sql, new BeanListHandler<>(clazz), params);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close(connection);
+        }
+    }
+
+    /**
+     * 查询单行记录(即单个对象),针对任意表
+     * @return 根据clazz类型返回对应T类型
+     */
+    public T querySingle(String sql, Class<T> clazz, Object... params) {
+
+        Connection connection = null;
+
+        try {
+            connection = getConnection();
+            return qr.query(connection,sql,new BeanHandler<>(clazz),params);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close(connection);
+        }
+    }
+
+    /**
+     * 查询单行单列(即单个对象)，针对任意表
+     * @return 返回表对应字段的一个对象
+     */
+    public Object queryScalar(String sql, Object... params) {
+
+        Connection connection = null;
+
+        try {
+            connection = getConnection();
+            return qr.query(connection,sql, new ScalarHandler(), params);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close(connection);
+        }
+    }
+
+
+    private Connection getConnection() throws SQLException {
+        return JDBCUtilsByDruid.getConnection();
+    }
+
+    private void close(Connection connection) {
+        JDBCUtilsByDruid.close(null,null, connection);
+    }
+}
+```
+
+**DAO接口**
+
+```java
+public interface ActorDAO<Actor> {
+
+  String tab_name = "actor";
+
+  /**
+   * 针对actor表的特殊方法,以查询actor生日为例
+   */
+  List<Actor> getAllActorBirth();
+}
+```
+
+**DAO实现类**
+
+```java
+public class ActorDAOImpl extends BasicDAO<Actor> implements ActorDAO{
+
+    @Override
+    public List<Actor> getAllActorBirth() {
+        String sql = "select name,birthday from " + ActorDAO.tab_name;
+        return queryMulti(sql, Actor.class);
+    }
+}
+```
+
+**实体类(以Actor为例)**
+
+```java
+public class Actor {
+    // actor表的字段
+    private Integer id;
+    private String name;
+    private String sex;
+    private Date birthday;
+    private String phone;
+
+    private Object[] fields = new Object[5];
+
+    // 构造器
+    public Actor() {} // 需要提供一个无参构造器[反射需要]
+
+    public Actor(Integer id, String name, String sex, Date birthday, String phone) {
+        this.id = id;
+        this.name = name;
+        this.sex = sex;
+        this.birthday = birthday;
+        this.phone = phone;
+    }
+    
+    @Override
+    public String toString() {
+        return "Actor{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", sex='" + sex + '\'' +
+                ", birthday=" + birthday +
+                ", phone='" + phone + '\'' +
+                '}'+"\n";
+    }
+}
+```
+
+# 正则表达式
+
+## 基本介绍
+
+RegExp(Regular Expression):正则表达式，**是对字符串执行模式匹配的技术**、
+
+- 介绍
+
+1.正则表达式，就是用某种模式去匹配一个字符串的公式
+
+- regexp底层分析
+
+```java
+/*
+	提供一段文本，要求找出所有四个数字连在一起的子串
+*/
+public class RegexpTheory {
+  public static void main(String[] args) {
+
+    String content = "1998年12月8日，第二代Java平台的企业版J2EE发布。1999年6月，Sun公司发布了" +
+            "第二代Java平台（简称为Java2）的3个版本：J2ME（Java2 Micro Edition，Java2平台的微型" +
+            "版），应用于移动、无线及有限资源的环境；J2SE（Java 2 Standard Edition，Java 2平台的" +
+            "标准版），应用于桌面环境；J2EE（Java 2Enterprise Edition，Java 2平台的企业版），应" +
+            "用3443于基于Java的应用服务器。Java 2平台的发布，是Java发展过程中最重要的一个" +
+            "里程碑，标志着Java的应用开始普及9889 ";
+
+
+    test02(content);
+  }
+
+  public static void test01(String content) {
+    
+    // 目标：匹配所有四个数字
+    //说明：\\d表示任意一个数字
+    String regString = "\\d\\d\\d\\d";
+
+    // 创建模式对象
+    Pattern pattern = Pattern.compile(regString);
+
+    // 创建匹配器
+    // 说明：创建匹配器matcher，按照正则表达式规则去匹配content字符串
+    Matcher matcher = pattern.matcher(content);
+
+    // 开始匹配
+    /**
+     * matcher.find()完成任务
+     * 1.根据指定规则，返回满足给定规则的指定字符串(如1998)
+     * 2.找到后将子字符串开始的索引记录到matcher对象的属性 int[] groups
+     *   groups[0] = 0 ,把该字字符串结束的索引+1的值记录到 groups[1] = 4
+     * 3.同时也记录oldLast的值为该字字符串结束的索引+1的值即4，下次执行find()方法时，就从4开始匹配
+     *
+     * matcher.group(0) 分析
+     * 源码：
+     *   public String group(int group) {
+     *         if (first < 0)
+     *             throw new IllegalStateException("No match found");
+     *         if (group < 0 || group > groupCount())
+     *             throw new IndexOutOfBoundsException("No group " + group);
+     *         if ((groups[group*2] == -1) || (groups[group*2+1] == -1))
+     *             return null;
+     *         return getSubSequence(groups[group * 2], groups[group * 2 + 1]).toString();
+     *     }
+     * 1.根据groups[0]=0 和groups[1]=4 记录的位置[0,4)，从content开始截取子串返回
+     *
+     * 如果再次执行find()方法，仍然按照上述分析
+     */
+    while (matcher.find()) {
+      System.out.println("找到：" + matcher.group(0));
+    }
+  }
+
+  public static void test02(String content) {
+    
+    String regString = "(\\d\\d)(\\d\\d)";
+    Pattern pattern = Pattern.compile(regString);
+    Matcher matcher = pattern.matcher(content);
+    
+    /**
+     * matcher.find(int group)完成任务(考虑分组)
+     * 分组：如(\d\d)(\d\d)，正则表达式中有()表示分组，第一个()表示第一组，第二个()表示第二组。。。
+     * 1.根据指定规则，返回满足给定规则的指定字符串(如1998)
+     * 2.找到后将子字符串开始的索引记录到matcher对象的属性 int[] groups
+     *   2.1 groups[0] = 0 ,把该字字符串结束的索引+1的值记录到 groups[1] = 4
+     *   2.2 记录第一组()匹配到的字符串位置groups[2] = 0, groups[3] = 1+1 = 2
+     *   2.3 记录第二组()匹配到d字符串位置groups[4] = 2,groups[5] = 3+1 =4;
+     *   2.4 如果有更多分组以此类推
+     * 3.总结
+     *   3.1 groups(0)表示匹配到的子字符串
+     *   3.2 groups(1)表示匹配到的子字符串的第一组字符串
+     *   3.3 groups(2)表示匹配到的子字符串的第二组字符串
+     *   3.4 分组数不能越界
+     *
+     * matcher.group()同test01
+     */
+    while (matcher.find()) {
+      System.out.println("找到：" + matcher.group(1));
+    }
+  }
+}
+```
+
+## 正则表达式语法
+
+- 基本介绍
+
+要灵活运用正则表达式，必须了解其中各种==元字符==的功能，元字符从功能上大致分类：
+
+​	1.限定符
+
+​	2.选择匹配符
+
+​	3.分组组合和反向引用符
+
+​	4.特殊字符
+
+​	5.字符匹配符
+
+​	6.定位符
+
+- 转义符
+
+\\\ 符号说明：在使用正则表达式去检索某些**特殊字符**的时候，需要使用转义符号，否则匹配不到结果，甚至报错
+
+需要使用转义符的字符有：`. * + ( ) $ | \ ? [ ] ^ { }`
+
+- 字符匹配符
+
+| 符号 | 含义                                                         | 示例           | 解释                                                     |
+| ---- | ------------------------------------------------------------ | -------------- | :------------------------------------------------------- |
+| [ ]  | 可接受字符列表（在中括号内的字符均不需要使用转义符,  但`-`须凡在最后，否则视作连字符） | [efgh]         | e,f,g,h中任意的一个字符                                  |
+| [^]  | 不可接受字符列表                                             | [^abc]         | 除a,b,c之外的任意一个字符，包括数字和特殊符号            |
+| -    | 连字符                                                       | [A-Z]          | 任意单个大写字母                                         |
+| .    | 匹配除/n以外的任意字符                                       | a..b           | 以a开头，b结尾，中间包括2个任意字符的长度为4的字符串     |
+| \\\d | 匹配单个数字字符，相当于[0-9]                                | \\\d{3}(\\\d)? | 包括3个或4个数字的字符串                                 |
+| \\\D | 匹配单个非数字字符串，相当于[\^0-9]                          | \\\D(\\\d)*    | 以单个非数字字符开头，后接任意个数字符的字符串           |
+| \\\w | 匹配单个数字，大小写字符和下划线，相当于[0-9a-zA-Z_]         | \\\d{3}\\\w{4} | 以3个数字字符开头的长度为7的数字字母字符串               |
+| \\\W | 匹配单个非数字，大小写字符和下划线，相当于[\^0-9a-zA-Z_]     | \\\W+\\d{2}    | 以至少一个非数字字母字符开头，两个数字字符为结尾的字符串 |
+| \\\s | 匹配任何空白字符(空格，制表，换页符等)，相当于[\f\n\r\t\v]   |                |                                                          |
+| \\\S | 匹配任何非空白字符(空格，制表，换页符等),相当于[\^\f\n\r\t\v] |                |                                                          |
+
+注：`[\s\S]`表示完全通配
+
+- 大小写
+
+java正则表达式默认区分大小写，如何实现不区分大小写
+
+​	1.`(?i)abc`表示abc不区分大小写
+
+​	2.`a(?i)bc`表示bc不区分大小写
+
+​	3.`a((?ib))c`表示只有b不区分大小写
+
+​	4.`Pattern pattern = Pattern.compile(regEx,Pattern.CASE_INSENSITIVE);`
+
+- 选择匹配符
+
+在匹配某个字符串的时候是选择性的，既可以匹配这个，又可以匹配那个
+
+| 符号 | 含义                       | 示例   | 解释   |
+| ---- | -------------------------- | ------ | ------ |
+| \|   | 匹配"\|"之前或之后的表达式 | ab\|cd | ab或cd |
+
+- 限字符
+
+用于指定前面的字符和组合项连续出现多少次
+
+| 符号  | 含义                           | 示例        | 解释                                      |
+| ----- | ------------------------------ | ----------- | ----------------------------------------- |
+| *     | 指定字符重复0或n次（零到多）   | (abc)*      | 仅包含任意个abc的字符串                   |
+| +     | 指定字符重复1或n次（1到多）    | m+(abc)*    | 以至少1个m开头，后接任意个abc的字符串     |
+| ？    | 指定字符重复0或1次（最多1次）  | m+abc?      | 以m开头，后接ab或abc的字符串              |
+| {n}   | 指定n个匹配字符                | [abcd]{3}   | 由a或b或c或d组成的任意长度为3的字符串     |
+| {n,}  | 指定至少n个匹配字符            | [abcd]{3,}  | 由a或b或c或d组成的任意长度不小于3的字符串 |
+| {n,m} | 指定至少n个但不多于m个匹配字符 | [abcd]{3,5} | 由a或b或c或d组成的任意长度在[3,5]的字符串 |
+
+注：java匹配默认**贪婪匹配**，即尽可能匹配多的
+
+- 定位符
+
+规定要匹配的字符串出现的位置
+
+| 符号  | 含义                 | 示例               | 解释                                                         |
+| ----- | -------------------- | ------------------ | ------------------------------------------------------------ |
+| ==^== | 指定字符串起始字符   | ^[0-9]+[a-z]*      | 以至少一个数字开头，后接任意个小写字母的字符串               |
+| ==$== | 指定字符串结束字符   | ^[0-9]\\\\-[a-z]+$ | 以1个数字开头后接连接字符"-"，并以至少1个任意小写字母结尾    |
+| \\\b  | 匹配目标字符的边界   | a\\\b              | 字符串边界是指子字符串间有空格，或是目标字符串的结束位置(e.g. "abc==a== bc==a==") |
+| \\\B  | 匹配目标字符的非边界 | a\\\b              | 和\\\b含义相反(e.g. "==a==bca bca")                          |
+
+- 分组
+
+**捕获分组**
+
+| 常用分组结构      | 说明                                                         |
+| ----------------- | ------------------------------------------------------------ |
+| (pattern)         | 非命名捕获。捕获匹配字符，编号为0的第一个捕获是由整个正则表达式模式匹配的文本，其他捕获结果则根据左括号顺序从1开始自动编号 |
+| (?\<name>pattern) | 命名捕获。将匹配的子字符串捕获到一个组名或编号名称中，用于name的字符串**不能包含任何标点符号且不能以数字开头**，可以使用单引号替代尖括号(?'name') |
+
+**非捕获分组**
+
+| 常用分组结构 | 说明                                                         |
+| ------------ | ------------------------------------------------------------ |
+| (?:pattern)  | 匹配pattern但不捕获该匹配的子表达式，即为非捕获匹配，不存储供以后使用的匹配。这对于用"or"或"\|"组合模式的情况很有用。e.g. ”industr(?:y\|ies)“是比"industry\|industries"更经济的表达式 |
+| (?=pattern)  | 非捕获分组。e.g.”Window(?=95\|98\|NT\|2000)"匹配的是"Windows95","Windows98","WindowsNT","Windows2000"中的"Windows"，但不匹配"Windows3.1"中的“Windows" |
+| (?!pattern)  | 非捕获分组，匹配不处于匹配pattern的字符串的起始点的搜索字符串 |
+
+- 非贪婪匹配
+
+`* + ? {n} {n,} {n,m}`是贪婪匹配，在这些限字符后加上`?`匹配模式为**非贪婪匹配**，尽可能匹配少的
+
+- 应用实例
+
+e.g.验证url是否满足格式
+
+```java
+public class ExamUrl{
+    public static void main(String[] args) {
+
+        String content = "https://www.bilibili.com/video/BV1fh411y7R8?p=894";
+
+        /**
+         * 思路：
+         * 1.先确定url开始部分 https://
+         * 2.然后通过([\w-]+\.)+[\w-]+$匹配www.bilibili.com
+         * 3，/video/BV1fh411y7R8?p=894的匹配
+         */
+        String regStr = "^(https?://)?([\\w-]+\\.)+[\\w-]+(/[\\w-?=&/%.#]*)?$";
+
+        Pattern pattern = Pattern.compile(regStr);
+        Matcher matcher = pattern.matcher(content);
+
+        System.out.println(matcher.find() ? "满足格式" : "不满足格式");
+    }
+}
+```
+
+## 正则表达式常用类
+
+`java.util.regex`主要包括了三个类`Pattern`,`Matcher`和`PatternSyntaxException`
+
+- Pattern类
+
+pattern对象是一个正则表达式对象。Pattern对象**没有公共构造器方法**，要创建一个pattern对象，需调用其公共静态方法`compile(String regex)`,返回一个Pattern对象。该方法接收一个正则表达式作为第一个参数
+
+- Matcher类
+
+matcher对象是对输入字符串进行解释和匹配的引擎，也没有公共构造器方法，需要调用pattern对象的`matcher()`方法来获得一个matcher对象
+
+- PatternSyntaxException
+
+PatternSyntaxException是一个非强制异常，表示一个正则表达式模式中的语法错误
 
 
 
+- 方法
+
+**Pattern**
+
+`Pattern.matches(String regex, CharSequence input)`：是否**整体匹配** (String implements CharSequence)
+
+```java
+public class Matches{
+    public static void main(String[] args) {
+
+        String content = "https://www.bilibili.com/video/BV1fh411y7R8?p=894";
+        String regStr = "(https?://)?([\\w-]+\\.)+[\\w-]+(/[\\w-?=&/%.#]*)?";
+
+        System.out.println(Pattern.matches(regStr, content) ? "满足格式" : "不满足格式"); // match方法更为简便且不需要定位符
+    }
+}
+```
+
+**Metcher**
+
+`public int start()`：返回之前匹配的初始索引 (==groups[0==])
+
+`public int end()`：返回最后匹配字符之后的偏移量 (==groups[1]==)
+
+`public boolean matches()`：整体匹配方法，常用于检验某个字符串是否满足某个规则
+
+`public String replaceAll(String replacement)`：替换模式与给定替换字符串相匹配的输入序列的每个子序列,该方法返回新字符串，不影响原来的字符串
+
+## 反向引用
+
+- 介绍
+
+1.分组
+
+可以用圆括号`()`组成一个比较复杂的匹配模式，圆括号的部分可以看作一个**子表达式/分组**
+
+2.捕获
+
+把正则表达式中的子表达式的内容保存到内存中以数字编号或显式命名的组里，方便后面引用
+
+3.反向引用
+
+圆括号的内容被捕获后，可以在这个括号后被引用，从而写出比较使用匹配模式，称为**反向引用**,可以理解为相当于复制了一份前面的匹配项
+
+这种引用既可以在正则表达式内部，也可以在其外部
+
+内部反向引用使用 \\\分组号，外部反向引用使用 $分组号
+
+- 案例
+
+1.匹配两个连续相同的数字：`(\\d)\\1`
+
+2.匹配五个连续相同的数字：`(\\d)\\1{4}`
+
+e.g.匹配个位与千位相同，十位与百位相同的数：`(\\d)(\\d)\\2\\1`
+
+e.g.
+
+```java
+public class BackReferences {
+  public static void main(String[] args) {
+    /*
+     * 请在字符串中检测商品编号，形式如：12321-333999111这样的号码
+     * 要求前5位是数字，中间用-连接，最后是9个数字，连续的每3位相同
+     */
+    String regStr = "^\\d{5}-(\\d)\\1{2}(\\d)\\2{2}(\\d)\\3{2}$";
+    String content = "12321-333999111";
+    System.out.println(Pattern.matches(regStr,content));
+  }
+}
+```
+
+e.g.
+
+```java
+/*
+ * 结巴去重
+ */
+public class stammerQuestion {
+    public static void main(String[] args) {
+
+        String content = "我我我。。。我有有有。。。结结。。。巴。。。";
+        
+        // 1.去掉所有的。
+        Pattern pattern = Pattern.compile("。");
+        Matcher matcher = pattern.matcher(content);
+        content = matcher.replaceAll("");
 
 
+        // 2.去掉重复的字
+        // (1) 使用(.)\\1+匹配所有重复字
+        String regStr = "(.)\\1+";
+        pattern = Pattern.compile(regStr); // 分组的捕获内容记录到了$1
+        // 正则表达式变化，需要重置matcher
+        matcher = pattern.matcher(content);
 
+        // (2) 使用反向引用替换匹配到的内容
+        content = matcher.replaceAll("$1");
 
+        System.out.println(content);
 
+        /*
+            使用一条语句完成去重
+            Pattern.compile(regStr).matcher(content).replaceAll("$1");
+         */
+    }
+}
+```
 
+**replaceAll()源码**
 
+```java
+public String replaceAll(String replacement) {
+    reset();
+    boolean result = find();
+    if (result) {
+        StringBuilder sb = new StringBuilder();
+        do {
+            appendReplacement(sb, replacement);
+            result = find(); // find()方法会更新$1中的内容
+        } while (result); // replaceAll方法内存在循环
+        appendTail(sb);
+        return sb.toString();
+    }
+    return text.toString();
+}
+```
 
+- 替换功能
 
+String类的`public String replaceAll(String regex,String replacement)`
 
+String类的`public boolean matches(String regex)`
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+String类的`public String[] split(String regex)`
 
 
 
