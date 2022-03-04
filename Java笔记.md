@@ -1077,11 +1077,15 @@ Instant instant = date.toInstant();
 ## 集合体系图
 
 单列集合
-![](https://obohe.com/i/2021/10/26/xzlqs.png)
+
+Collection01
+
 Collection接口有两个重要子接口 List    Set，它们实现子类都是单列集合
 
 双列集合
-![]()
+
+Collection02
+
 Map接口的实现子类是双列集合，存放的是K-V
 
 ## Collection接口
@@ -1110,10 +1114,10 @@ Map接口的实现子类是双列集合，存放的是K-V
 
 Iterator对象称为迭代器，主要用于遍历Collection集合中的元素
 
-所有实现了Collection接口的集合类都有一个iterator()方法，用于返回一个实现了Iterator接口的对象
+**所有实现了Collection接口**的集合类都有一个iterator()方法，用于返回一个实现了Iterator接口的对象
 
 Iterator结构：
-![](https://obohe.com/i/2021/10/26/gzl216.png)
+Collection03
 ==注意：==
 1.next()方法返回的是**Object（编译类型）**
 2.使用next()方法前必须先调用hasNext()方法进行检测。若不调用且下一条记录无效，直接调用next()会抛出NoSuchElementException异常
@@ -6367,6 +6371,376 @@ String类的`public String[] split(String regex)`
 
 
 
+# Java8新特性
+
+Java8(jdk1.8)是Java语言开发的一个主要版本，为Java语言，编译器，类库，开发工具与JVM带来大量新特性
+
+- 速度更快
+- 代码更少（==Lambda表达式==）
+- 强大的==Stream API==
+- 便于并行
+- 最大化减少空指针异常：Optional
+- Nashorn引擎，允在JVM上运行JS引用
+
+## Lambda表达式
+
+Lambda是一个**匿名函数**，可以理解为一段可以传递的代码（将代码像数据一样进行传递）
+
+- Lambda使用案例
+
+e.g.
+
+```java
+public class LambdaTest {
+    @Test
+    public void test() {
+        Runnable r1 = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("线程1。。。");
+            }
+        };
+        r1.run(); 
+        System.out.println("=========");
+        
+        Runnable r2 = () -> System.out.println("线程2。。。");
+        r2.run();
+    }
+    
+      @Test
+    public void test2() {
+        Comparator<Integer> com1 = new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return Integer.compare(o1,o2);
+            }
+        };
+        System.out.println(com1.compare(12,21));
+        
+        // Lambda表达式
+        Comparator<Integer> com2 = (o1, o2) -> Integer.compare(o1,o2);
+        System.out.println(com2.compare(12,21));
+        
+        // 方法引用
+        Comparator<Integer> com3 = Integer :: compare;
+        System.out.println(com3.compare(12,21));
+    }
+}
+```
+
+- Lambda使用
+
+1.举例：`(o1,o2) -> {Integer.compare(o1,o2)};`
+
+2.格式：
+
+​			-> ：Lambda操作符 或 箭头操作符
+
+​			() : Lambda形参列表（接口中抽象方法的形参列表）
+
+​			{} : Lambda体（重写抽象方法的方法体）
+
+3.Lambda表达式使用：6种情况
+
+==**Lambda表达式的本质：作为函数式接口的实例**==
+
+```java
+public class LambdaTest1 {
+  // 语法格式1：无参无返回值
+  @Test
+  public void test1() {
+    Runnable r1 = new Runnable() {
+      @Override
+      public void run() {
+        System.out.println("线程1。。。");
+      }
+    };
+    r1.run();
+
+    Runnable r2 = () -> {
+      System.out.println("线程2。。。");
+    };
+    r2.run();
+  }
+
+  // 语法格式2：有参无返回值
+  @Test
+  public void test2() {
+    Consumer<String> con1 = new Consumer<String>() {
+      @Override
+      public void accept(String s) {
+        System.out.println(s);
+      }
+    };
+    con1.accept("con1");
+
+    Consumer<String> con2 = (String s) -> {
+      System.out.println(s);
+    };
+    con2.accept("con2");
+  }
+
+  // 语法格式3：数据类型可省略，因为可由编译器推断出，称为类型推断
+  @Test
+  public void test3() {
+    Consumer<String> con1 = (s) -> {
+      System.out.println(s);
+    };
+    con1.accept("con1");
+    /*
+      类型推断案例
+      1.ArrayList<String> list = new ArrayList<(String)>();
+      2.int[] arr = (new int[]){1,2,3}
+     */
+  }
+
+  // 语法格式4：Lambda若只需要一个参数，参数的小括号可省略
+  @Test
+  public void test4() {
+    Consumer<String> con1 = s -> {
+      System.out.println(s);
+    };
+    con1.accept("con1");
+  }
+
+  // 语法格式5：Lambda需要多个参数，多条语句，并且可以有返回值
+  @Test
+  public void test5() {
+    Comparator<Integer> com1 = new Comparator<Integer>() {
+      @Override
+      public int compare(Integer o1, Integer o2) {
+        return o1.compareTo(o2);
+      }
+    };
+    System.out.println(com1.compare(12,21));
+
+    Comparator<Integer> com2 = (o1,o2) ->{
+      System.out.println(o1);
+      System.out.println(o2);
+      return o1.compareTo(o2);
+    };
+    System.out.println(com2.compare(12,21));
+  }
+
+  // 语法格式6：当Lambda只有一条语句，return和大括号都可以省略
+  @Test
+  public void test6() {
+    Comparator<Integer> com1 = (o1,o2) -> o1.compareTo(o2);
+    System.out.println(com1.compare(12,21));
+  }
+}			
+```
+
+## Function接口
+
+- 定义
+
+如果一个接口中只声明了一个抽象方法，就称该接口为函数式接口
+
+```java
+@FunctionalInterface
+public interface MyInterface {
+
+    void myMethod();
+}
+```
+
+可以通过Lambda表达式创建该接口的对象（**OOF面向函数编程**）
+
+`@FunctionalInterface`注解可以检验是否是函数式接口
+
+- java内置函数式接口
+
+java四大核心函数接口
+
+| 函数式接口              | 参数类型 | 返回类型 |                             用途                             |
+| ----------------------- | -------- | -------- | :----------------------------------------------------------: |
+| Consumer\<T>消费型接口  | T        | void     |     对类型为T的对象应用操作，包含方法`void accpet(T t)`      |
+| Supplier\<T>供给型接口  | 无       | T        |             返回类型为T的对象，包含方法`T get()`             |
+| Function\<T>函数型接口  | T        | R        | 对类型为T的对象应用操作，并返回结果，结果是R型对象；包含方法`R apply(T t)` |
+| Predicate\<T>断定型接口 | T        | boolean  | 确定类型为T的对象是否满足某约束，并返回boolean值；包含方法`boolean test(T t)` |
+
+e.g.
+
+```java
+public class LambdaTest2 {
+
+    @Test
+    public void test1() {
+        cost(500,money -> System.out.println("花费" + money));
+    }
+    public void cost(double money, Consumer<Double> con) {
+        con.accept(money);
+    }
+    
+    @Test
+    public void test2() {
+        List<String> list = Arrays.asList("北京","南京","天津","东京","西京");
+        //找出含“京”的字符串并封装到集合中
+        List<String> newList = filterString(list,s -> s.contains("京"));
+        System.out.println(newList);
+    }
+    // 根据某种规则进行过滤
+    public List<String> filterString(List<String> list, Predicate<String> pre){
+        ArrayList<String> filterString = new ArrayList<>();
+
+        for (String s : list){
+            if (pre.test(s)) { // 过滤规则由pre.test()决定
+                filterString.add(s);
+            }
+        }
+        return filterString;
+    }
+}
+```
+
+## 方法引用和构造器引用
+
+### 方法引用
+
+- 当要传递给Lambda体的操作，**已经有该方法的实现**，可以使用方法引用
+- 方法引用可以看作是Lambda表达式的一个深层次表达，即方法引用就是Lambda表达式，也就是函数式接口的一个实例，**通过方法的名字来指向一个方法**
+
+
+
+**使用**
+
+格式：`类(或对象) :: 方法名`
+
+要求：接口中**抽象方法的形参列表和返回值类型**与方法引用的**具体方法的形参列表和返回值**相同（针对于情况1，2）
+
+具体分为如下三种情况：
+
+​	1.对象 :: 非静态方法
+
+​	2.类 :: 静态方法
+
+​	3.类 :: 非静态方法（较难理解）
+
+```java
+public class MethodRefTest {
+  /*
+    情况1：对象::实例方法
+    Consumer中的void accept(T t)
+    PrintStream中的void println(T t)
+   */
+  @Test
+  public void test1() {
+    Consumer<String> con = System.out::println;
+    con.accept("北京");
+  }
+
+  /*
+    Supplier中的T get()
+    Employee中的String getName()
+   */
+  @Test
+  public void test2() {
+    Employee employee = new Employee("jack");
+    Supplier<String> sup = employee:: getName;
+    System.out.println(sup.get());
+  }
+
+  /*
+    情况2：类::静态方法
+    Comparator中的int compare(T t1,T t2)
+    Integer中的int compare(int x,int y)
+   */
+  @Test
+  public void test3() {
+    Comparator<Integer> com = Integer::compare;
+    System.out.println(com.compare(12,10));
+  }
+
+  /*
+    Function中的R apply(T t)
+    Math中的Long round(Double d)
+   */
+  @Test
+  public void test4() {
+    Function<Double,Long> fun = Math::round; // 四舍五入
+    System.out.println(fun.apply(2.4));
+  }
+
+  /*
+    情况3：类::实例方法
+    Comparator中的int compare(T t1,T t2)
+    String中的int t1.compareTo(t2) // t1作为方法的调用者
+   */
+  @Test
+  public void test5() {
+    Comparator<String> com = String::compareTo;
+    System.out.println(com.compare("jack","jock")); // a-0 = -14
+  }
+
+  /*
+    Function中的R apply(T t)
+    Employee中的String getName()
+   */
+  @Test
+  public void test6() {
+    Employee employee = new Employee("tom");
+    Function<Employee,String> fun = Employee::getName;
+    System.out.println(fun.apply(employee));
+  }
+}
+```
+
+### 构造器引用
+
+- 构造器引用
+
+```java
+public class ConstructRefTest {
+
+    // 构造器引用
+    // Supplier的T get()
+    // Employee的空参构造器Employee()
+    @Test
+    public void test1() {
+        Supplier<Employee> sup = Employee::new; // new后无需参数
+        System.out.println(sup.get());
+    }
+    /*
+        根据不同的构造器选择不同的函数接口
+        如Function的R apply(T t),BiFunction的R apply(T t,U u)
+     */
+}
+```
+
+- 数组引用
+
+```java
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 设计模式
 
 ## 单例模式
@@ -6461,16 +6835,6 @@ public class Client {
 	}
 }
 ```
-
-
-
-
-
-
-
-
-
-
 
 
 
