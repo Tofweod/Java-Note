@@ -727,7 +727,7 @@ String中有属性 private final char value[ ]（注：数组也是对象），�
 
 - 方法1先从常量池查看是否有“hsp”数据空间，如果有则直接指向；如果没有则重写创建，然后指向；s最终指向的是==常量池的空间地址==
 - 方法2先在堆中创建空间，里面维护了value属性，指向常量池“hsp”空间。如果常量池没有“hsp”，则重新创建；如果有，则直接通过value指向。最终指向的是==堆中的空间地址==
-![](https://github.com/Tofweod/NoteImg/raw/main/src/CommonClass/CommonClass01.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/CommonClass/CommonClass01.png)
 
 ==重要==
 String对象特征
@@ -789,7 +789,7 @@ String常用方法
 ## StringBuffer
 
 ### 继承关系
-<img src="https://github.com/Tofweod/NoteImg/raw/main/src/CommonClass/CommonClass02.png"  />
+<img src="https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/CommonClass/CommonClass02.png"  />
 1.在StringBuffer的父类AbstractStringBuilder中有属性char[] value(不是==final==)，用于存储字符串内容，因此存放在堆中
 2.StringBuffer是final类
 
@@ -833,7 +833,7 @@ StringBuffer strBuffer = stringBuffer.append(str);
 ## StringBuilder
 
 ### 继承关系
-![](https://github.com/Tofweod/NoteImg/raw/main/src/CommonClass/CommonClass02.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/CommonClass/CommonClass03.png)
 
 ### 使用事注意事项
 
@@ -988,8 +988,6 @@ SimpleDateFormat：格式化和解析日期的具体类
 
 使用：
 
-<img src="https://obohe.com/i/2021/10/23/12aflek.png" style="zoom: 50%;" />
-
 ```java
 Date d1 = new Date(); //获取当前时间
 // 格式化d1 格式化使用字母已规定好
@@ -1078,13 +1076,13 @@ Instant instant = date.toInstant();
 
 单列集合
 
-<img src="https://github.com/Tofweod/NoteImg/raw/main/src/Collection/Collection01.png" style="zoom:80%;" />
+<img src="https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/Collection/Collection01.png" style="zoom:80%;" />
 
 Collection接口有两个重要子接口 List    Set，它们实现子类都是单列集合
 
 双列集合
 
-<img src="https://github.com/Tofweod/NoteImg/raw/main/src/Collection/Collection02.png" style="zoom:98%;" />
+<img src="https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/Collection/Collection02.png" style="zoom:98%;" />
 
 Map接口的实现子类是双列集合，存放的是K-V
 
@@ -1117,7 +1115,7 @@ Iterator对象称为迭代器，主要用于遍历Collection集合中的元素
 **所有实现了Collection接口**的集合类都有一个iterator()方法，用于返回一个实现了Iterator接口的对象
 
 Iterator结构：
-![](https://github.com/Tofweod/NoteImg/raw/main/src/Collection/Collection03.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/Collection/Collection03.png)
 ==注意：==
 1.next()方法返回的是**Object（编译类型）**
 2.使用next()方法前必须先调用hasNext()方法进行检测。若不调用且下一条记录无效，直接调用next()会抛出NoSuchElementException异常
@@ -1209,7 +1207,7 @@ Vector和ArrayList比较
 底层机制
 1.LinkedList中维护了两个属性first和last分别指向首节点和尾节点
 2.每个节点（Node对象），里面又维护了prev、next、item三个属性，其中通过prev指向前一个节点，通过next指向后一个节点。最终实现双向链表
-![](https://github.com/Tofweod/NoteImg/raw/main/src/Collection/Collection04.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/Collection/Collection04.png)
 3.LinkedList元素的==添加和删除==，不是通过数组完成，效率较高
 4.LinkedList中也有CRUD方法(add,remove,set,get等)
 
@@ -1932,8 +1930,6 @@ class DaemonThread extends Thread {
 	// 需要被同步的代码块;
 }`
 
-![](https://obohe.com/i/2021/11/23/10q14sy.png)
-
 ### 互斥锁
 
 1.Java中引入了对象互斥锁，来保证共享数据操作的完整性
@@ -2122,7 +2118,7 @@ class DeadLockDemo extends Thread {
 |  输入流  | InputStream  | Reader |
 |  输入流  | OutputStream | Writer |
 
-<img src="https://img-blog.csdnimg.cn/20190503233300304.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTAxNDUyMTk=,size_16,color_FFFFFF,t_70" style="zoom:67%;" />
+<img src="https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/IO/IO01.png"/>
 
 ## 字节流
 
@@ -2948,7 +2944,7 @@ method.invoke(obj);
 cat对象 ---> 类型Person类
 cls对象 ---> 类型Class类
 
-![](https://github.com/Tofweod/NoteImg/raw/main/src/Reflection/Reflection01.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/Reflection/Reflection01.png)
 
 作用：反射就是将类别的各个组成部分进行剖析，**可以得到每个组成部分，就可以对每一部分进行操作**。在比较复杂的程序或框架中来使用反射技术，可以简化代码提高程序的复用性
 
@@ -3132,9 +3128,9 @@ public static void m3(){
 
   **类加载过程图**
 
-<img src="https://github.com/Tofweod/NoteImg/raw/main/src/Reflection/Reflection02.png" style="zoom:60%;" />
+<img src="https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/Reflection/Reflection02.png" style="zoom:60%;" />
 
-<img src="https://github.com/Tofweod/NoteImg/raw/main/src/Reflection/Reflection03.png" style="zoom:80%;" />
+<img src="https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/Reflection/Reflection03.png" style="zoom:80%;" />
 
 - 加载阶段
   JVM在该阶段的主要目的是将字节码从不同的数据源（class文件，jar包，甚至网络）转化为二进制字节流加载到内存中，并生成一个代表该类的`java.lang.Class`对象
@@ -3259,7 +3255,7 @@ class Person{
 
 - 数据库管理系统、数据库和表关系示意图
 
-![](https://github.com/Tofweod/NoteImg/raw/main/src/MySQL/MySQL01.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/MySQL/MySQL01.png)
 
 ==数据库-表的本质仍然是文件==
 
@@ -4687,7 +4683,7 @@ mysql中的用户，都存储在系统数据库mysql中的user表中
 
 - JDBC原理图
 
-![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC01.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/JDBC/JDBC01.png)
 
 - JDBC好处
 
@@ -4697,7 +4693,7 @@ JDBC是Java提供的一套用于数据库操作的接口API，==Java程序员只
 
 JDBC API是一系列接口，统一和规范了应用程序与数据库的连接、执行SQL语句、并得到返回结果等各类操作，相关类和接口在`java.sql`与`javax.sql`中
 
-![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC02.png)]()
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/JDBC/JDBC02.png)]()
 
 
 
@@ -4942,7 +4938,7 @@ public class ResultSet_ {
 
 - 底层源码
 
-![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC03.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/JDBC/JDBC03.png)
 
 `rows`——所有行
 
@@ -5302,7 +5298,7 @@ public class Batch_ {
     }
 ```
 
-![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC04.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/JDBC/JDBC04.png)
 
 说明：1.byte数组`parameterStrings`即为setXxx()值
 
@@ -5780,7 +5776,7 @@ public <T> T query(Connection conn, String sql, ResultSetHandler<T> rsh, Object.
 
 - 表和JavaBean的类型映射关系
 
-![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC05.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/JDBC/JDBC05.png)
 
 ## DAO
 
@@ -5798,7 +5794,7 @@ apache-utlis和druid简化了JDBC开发，但仍有不足
 
 - BasicDAO示意图
 
-![](https://github.com/Tofweod/NoteImg/raw/main/src/JDBC/JDBC06.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/JDBC/JDBC06.png)
 
 - 基本说明
 
@@ -6808,7 +6804,7 @@ Java8中的Arrays静态方法stream()可以获取数据流
 
 重载类型：能够处理对应基本类型的数组
 
-![](https://github.com/Tofweod/NoteImg/blob/main/src/Java8/Java8-01.png)
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaSE/Java8/Java8-01.png)
 
 e.g.
 
@@ -6906,8 +6902,8 @@ public class StreamAPITest01 {
 
 | 方法                | 描述                                                         |
 | ------------------- | ------------------------------------------------------------ |
-| map(Function f)     | 接收一个函数作为参数，将元素转换为其他形式或提取信息，该函数会被应用每个元素上，并将其映射称一个新的元素 |
-| flatMap(Function f) | 接收一个函数作为参数，将流中的每个值都**映射**到另一个流，然后把所有的流连接成一个流 |
+| map(Function f)     | 接收一个函数作为参数，将元素转换为其他形式或提取信息，该函数会被应用每个元素上，并将其映射称一个新的元素，结果返回一个流 |
+| flatMap(Function f) | 接收一个函数作为参数，将流中的每个值都分别**映射**到一个流上，然后把所有的流连接成一个流 |
 
 e.g.
 
