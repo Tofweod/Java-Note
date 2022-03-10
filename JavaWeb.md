@@ -506,5 +506,587 @@ e.g.演示
 
 ## CSS
 
+### 介绍
 
+- CSS技术介绍
+
+CSS是层叠样式表单，是用于（增强）控制网页样式并允许将样式信息与网页内容分离的一种标记性语言
+
+- CSS语法
+
+```css
+p{
+    font-size:80px;
+}
+/*
+	p------------选择器
+	fontsize-----属性
+	80px---------值
+*/
+```
+
+选择器：浏览器根据选择器决定CSS样式影响的html元素（标签）
+
+属性：是要改变的样式名，并且每个属性都有一个值；
+
+​			属性和值用冒号分开，并由花括号包围，这样组成一个简单的完整的样式声明 e.g.`p{color:red}`
+
+多个声明：如果要定义不止一个声明，则需要用分号将每个声明隔开
+
+​					注：一般每行只描述一个属性
+
+CSS注释：/\*注释内容\*/
+
+### CSS与HTML结合方式
+
+- 方式1
+
+在标签的**style属性**上设置"key:value"，修改标签样式
+
+```html
+<div style="color:red;border:1px;border-style: solid;" >div标签1</div>
+```
+
+缺点：
+
+​	1.样式多了代码冗长
+
+​	2.可读性非常差
+
+​	3.CSS代码没有复用性
+
+
+
+- 方式2
+
+在head标签中使用sytle标签定义各种需要的css样式
+
+格式：
+
+```css
+xxx{
+    Key:value value;
+    Key:value value;
+}
+```
+
+e.g.
+
+```html
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- style标签专门用来定义css样式代码,里面是css代码 -->
+    <style type="text/css">
+        div{
+            color:red;
+            border:1px;
+            border-style:solid;
+        }
+    </style>
+</head>
+```
+
+注：style里的注释应使用/**/
+
+问题：
+
+​	1.只能在同一页面复用代码，不能在多个页面复用css代码
+
+​	2.维护不方便，如果有很多页面就要到每个页面修改，工作量巨大
+
+
+
+- **方式3**
+
+把css样式写为一个单独的css文件，再通过==link标签==引入
+
+e.g.
+
+```css
+// 1.css文件
+div{
+    color:red;
+    border:1px solid orange;
+}
+```
+
+把css样式引入html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- link标签专门引入css样式 -->
+    <link rel="stylesheet" type="text/css" href="1.css"/>
+</head>
+<body>
+    <div>div标签1</div><br/>
+    <div>div标签1</div><br/>
+</body>
+</html>
+```
+
+
+
+### CSS选择器
+
+- 标签名选择器
+
+格式：
+
+```css
+标签名{
+	属性:值;
+}
+```
+
+标签名选择器，可以决定哪些标签被动地使用样式
+
+
+
+- id选择器
+
+格式：
+
+```css
+#id属性值{
+    属性:值;
+}
+```
+
+id选择器可以通过id属性**选择性**的去选择使用样式
+
+e.g.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #id001{
+            color:blue;
+            font:30px;
+            border:yellow 1px solid;
+        }
+
+        #id002{
+            color:red;
+            font:20px;
+            border:blue 5px dashed;
+        }
+    </style>
+</head>
+<body>
+    <div id="id001">div标签 id001</div><br/>
+    <span id="id002">span标签 id002</span><br/>
+</body>
+</html>
+```
+
+
+
+- class选择器（类型选择器）
+
+class类型选择器格式：
+
+```css
+.class属性值{
+    属性:值;
+}
+```
+
+class选择器可以通过class属性有效的选择性去使用样式
+
+e.g.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .class01{
+            color:blue;
+            font:30px;
+            border:1px yellow solid;
+        }
+    </style>
+</head>
+<body>
+    <div class="class01">div标签 class01</div><br/>
+    <span class="class01">span标签 class01</span><br/>
+</body>
+</html>
+```
+
+
+
+- 组合选择器
+
+格式：
+
+```css
+选择器1，选择器2...选择器n{
+    属性:值;
+}
+```
+
+组合选择器可以让多个选择器公用同一个css代码
+
+### 常用样式
+
+1.字体颜色
+
+`color : red`;
+
+颜色也可以用rgb值和十六进制表示值（后者必须加#），如rgb(255,0,0),#00F6DE
+
+
+
+2.宽度和高度
+
+`width : 1px; height : 1px;`
+
+宽高可以写像素值（单位px），也可以写百分比值
+
+
+
+3.背景颜色`background-color : blue;`
+
+
+
+4.字体大小`font-size`
+
+
+
+5.边框设置
+
+`border : color size style`
+
+
+
+6.DIV居中(DIV框相对于页面居中)
+
+`margin-left : auto;`
+
+`margin-right : auto;`
+
+
+
+7.文本居中
+
+`text-align : center;`
+
+
+
+8.超链接去下划线
+
+`text-decoration : none;`
+
+
+
+9.表格细线
+
+```css
+table{
+    border:1px solid black; // 设置边框
+    border-collapse:collapse; // 边框合并 table和td间隔去除，并合并为一条细线
+}
+td{
+    border:1px solid black; // 设置边框
+}
+```
+
+
+
+10.列表去修饰
+
+```css
+ul{
+    list-style:none;
+}
+```
+
+
+
+# JavaScript
+
+## 介绍
+
+- 基本介绍
+
+JavaScript语言诞生主要是完成页面的数据验证，因此运行在客户端，需要运行浏览器来解析执行JavaScript代码
+
+**JS是弱类型，Java是强类型**
+
+弱类型：类型可变
+
+强类型：定义变量时类型已确定且不可变
+
+
+
+- 特点
+
+1.交互性（可以做的就是信息的动态交互）
+
+2.安全性（不允许直接访问本地硬盘）
+
+3.跨平台性（只要是可以解释js的浏览器都可以执行，和平台无关）
+
+
+
+- JavaScript和HTML结合
+
+**方式1**
+
+在head标签或body标签中使用script标签来书写JavaScript代码
+
+```html
+<script type="text/javascript">
+    // javascript代码
+</script>
+```
+
+
+
+**方式2**
+
+使用script标签引入单独的javascript代码文件
+
+```html
+<script type="text/javascript" src="js文件路径"></script>
+```
+
+注：script标签可以用来定义js代码，也可以用来引入js文件；但是两个功能不能混用
+
+
+
+## 变量
+
+**变量是可以存放某些值的内存的命名**
+
+
+
+- JavaScript变量类型
+
+数值类型：number
+
+字符串类型：string
+
+对象类型：object
+
+布尔类型：boolean
+
+**函数类型**：function
+
+
+
+- JS特殊值
+
+undefined：未定义，所有js变量未赋予初始值时的默认值
+
+null：空值
+
+NAN：not a number，非数值
+
+
+
+- JS定义变量格式
+
+```javascript
+var 变量名;
+var 变量名 = 值;
+```
+
+e.g.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        var i;
+        alert(i) // undefined
+        i = 12;
+        // typeof函数返回变量数据类型
+        alert(typeof(i)) // number
+        i = "123";
+        alert(typeof(i)); // string
+    </script>
+</head>
+<body>
+</body>
+</html>
+```
+
+
+
+- 关系（比较）运算
+
+等于 ： ==			简单的字面值的比较
+
+**全等于**： ===		除了做字面值比较外，还会比较两个变量数据类型
+
+e.g.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        var a = 12;
+        var b = "12";
+        alert(a==b); // true
+        alert(a===b); // false
+    </script>
+</head>
+<body>
+</body>
+</html>
+```
+
+
+
+- 逻辑运算
+
+且运算：&&
+
+或运算：||
+
+取反运算：!
+
+**在javascript中所有变量都可以作为一个boolean类型的变量去使用**
+
+`0,null,undefined,"(空串)"`都认为是false
+
+
+
+&&运算两种情况
+
+第一种：当表达式全为真，返回最后一个表达式的值
+
+第二种：当表达式中有一个假时，返回第一个为假的表达式的值
+
+
+
+||运算两种情况
+
+第一种：当表达式全为假，返回最后一个表达式的值
+
+第二种：当表达式中有一个真时，返回第一个为真的表达式的值
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        var a = "abc";
+        var b = true;
+        var c = null;
+        var d = false;
+
+        // &&运算
+        alert(a&&b); // true
+        alert(b&&a); // true
+        alert(a&&c); // null
+        alert(a&&d); // fasle;
+        alert(a && c && d); // null
+
+    </script>
+</head>
+<body>
+</body>
+</html>
+```
+
+注：**&&与||均有短路** 
+
+
+
+- **数组运算**
+
+JS中数组定义格式：
+
+```css
+var 数组名 = []; // 空数组
+var 数组名 = [1,"abc",true]; // 定义数组并赋值，且元素类型可以不同
+```
+
+e.g.
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        var arr = []; // 定义空数组
+        arr[0] = 12;
+        alert(arr.length); // 1
+        arr[2] = "abc";
+        alert(arr.length); //3
+        // 数组遍历
+        for (var i = 0; i < arr.length; i++) {
+            alert(arr[i]);
+        }
+    </script>
+</head>
+<body>
+</body>
+</html>
+```
+
+JS中数组只要通过数组下标赋值，**最大下标值就会自动扩容数组**，中间未赋值的值是undefined
+
+
+
+## ==函数==
+
+**函数定义**
+
+方式1：使用function关键字来定义函数
+
+```css
+function 函数名(形参列表){
+    函数体
+}
+```
+
+e.g.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        // 定义函数
+        function fun01(){
+            alert("函数被调用")
+        }
+        // 调用函数
+        fun01();
+    </script>
+</head>
+<body>
+</body>
+</html>
+```
+
+
+
+方式2：
 
