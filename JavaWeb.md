@@ -1073,12 +1073,19 @@ e.g.
     <meta charset="UTF-8">
     <title>Title</title>
     <script type="text/javascript">
-        // 定义函数
+        // 定义无参函数
         function fun01(){
-            alert("函数被调用")
+            alert("无参函数被调用")
         }
         // 调用函数
         fun01();
+        
+        // 定义有参函数
+        function fun02(a,b){ //有参函数定义时不用指定参数数据类型
+            alert("有参函数被调用 a="+a+",b="+b);
+        }
+        // 调用
+        fun02(12,"abc");
     </script>
 </head>
 <body>
@@ -1088,5 +1095,503 @@ e.g.
 
 
 
-方式2：
+方式2：使用var定义函数
+
+格式
+
+```javascript
+var 函数名 = function(参数列表){函数体};
+```
+
+
+
+==注：在JS中函数重载会直接覆盖掉上一次的定义==
+
+
+
+- 函数的argumenss隐形参数（只在function函数内）
+
+在function函数中不需要定义，但可以直接用来获取所有参数的变量，称为隐形参数
+
+**arguments同java可变参数一样，操作类似数组**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+       function fun(){
+           alert(arguments)
+       }
+       fun(); // [objects Arguments]
+        
+        // 计算求和
+        function sum(num1,num2){
+            var result = 0;
+            for (var i = 0; i < arguments.length; i++){
+                if(typeof(arguments[i]) == "number"){
+                    result += arguments[i];
+                }
+            }
+            return result;
+        }
+        alert(sum(1,2,3,4,5,6,7,8,9,10,"abc(非法输入)")); // 55
+    </script>
+</head>
+<body>
+</body>
+</html>
+```
+
+
+
+## 自定义对象
+
+- Object形式的自定义对象
+
+对象定义
+
+```javascript
+var 变量名 = new Object(); // 空对象实例
+变量名.属性名 = 值; // 定义对象属性
+变量名.函数名 = function(){}; // 定义对象方法
+```
+
+对象访问
+
+```javascript
+变量名.属性名/函数名();
+```
+
+注：对象可以使用==this==关键字
+
+
+
+- 花括号形式的自定义对象
+
+对象定义
+
+```javascript
+var 对象名 = {
+    // 每个值或函数用，隔开 但最后一个不用加逗号
+    属性名:值, 
+    属性名:值,
+    函数名:function(){}
+}; 
+```
+
+对象访问同上
+
+
+
+## 事件
+
+事件是电脑输入设备与页面进行交互的响应
+
+
+
+**常用事件**：
+
+​	onload加载完成事件：页面加载完成之后，常用于做页面js代码初始化操作
+
+​	onclick单击事件：常用于按钮的点击响应操作
+
+​	onblur失去焦点事件：常用于输入框失去焦点后验证其输入内容是否合法
+
+​	onchange内容改变事件：常用于下拉列表和输入框内容发送改变后操作
+
+​	onsubmit表单提交事件：常用于表单提交前验证所有表单项是否合法
+
+
+
+- 事件注册（事件绑定）
+
+告知浏览器当事件响应后要执行哪些操作代码称为事件注册
+
+
+
+静态事件注册：通过html标签的事件属性直接赋予事件响应后的代码
+
+动态事件注册：先通过js代码得到标签的dom对象，然后再通过`dom对象.事件名 = function(){}`这种形式赋予事件响应后的代码
+
+
+
+- onload事件
+
+e.g.
+
+静态注册
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head >
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        // 将onload事件执行的代码封装成一个方法
+        function onloadFun(){
+            alert('静态注册onload事件');
+        }
+    </script>
+</head>
+<!--
+    静态注册onload事件
+    onload事件是浏览器解析完页面就会自动触发的事件
+-->
+<body onload="onloadFun()">
+</body>
+</html>
+```
+
+动态注册
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head >
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        // onload事件动态注册
+        window.onload = function (){
+            alert('动态注册onload事件');
+        }
+    </script>
+</head>
+<body>
+</body>
+</html>
+```
+
+
+
+- onclick事件
+
+静态注册
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        function onclickFun(name){
+            alert(name+'被触发');
+        }
+    </script>
+</head>
+<body>
+    <!-- 静态注册onclick事件 -->
+    <button name = "按钮1" onclick="onclickFun(name);">按钮1</button><br/>
+    <button name = "按钮2" onclick="onclickFun(name);">按钮2</button><br/>
+    <button name = "按钮3" onclick="onclickFun(name);">按钮3</button>
+</body>
+</html>
+```
+
+动态注册
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        // 动态注册onclick事件
+       window.onload = function() {
+           // 1.获取标签对象
+           /**
+            * document是JavaScript提供的一个对象（文档），表示整个页面所有内容
+            * getElementById：element就是标签，该方法通过id属性获取标签
+            * btnObjs是html页面button标签对象
+            */
+           var btnObj = document.getElementById("btn01");
+           // 2.标签对象.事件名 = function(){}
+           btnObj.onclick = function (){
+               alert("动态注册onclick事件");
+           }
+       }
+    </script>
+</head>
+<body>
+    <button id="btn01">按钮1</button>
+</body>
+</html>
+
+```
+
+或者
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <button id="btn01">按钮1</button>
+    <script type="text/javascript">
+        document.getElementById("btn01").onclick = function (){
+            alert("动态注册onclick事件");
+        }
+    </script>
+</body>
+</html>
+```
+
+
+
+- onblur事件
+
+e.g.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        // 静态注册
+        function onblurFun(){
+            // console是控制台对象，由javascript提供专门用于向浏览器控制台打印输出，用于测试使用
+            // log是打印的方法
+            console.log("静态注册onblur事件");
+        }
+
+        // 动态注册
+        window.onload = function (){
+            document.getElementById("password").onblur = function (){
+                console.log("动态注册onblur事件")
+            }
+        }
+    </script>
+</head>
+<body>
+<form action="">
+    <table>
+        <tr>
+            <td><label>user:</label></td>
+            <td>
+                <input type="text" onblur="onblurFun()"><br/>
+            </td>
+        </tr>
+        <tr>
+            <td><label>password:</label></td>
+            <td>
+                <input type="password" id="password"><br/>
+            </td>
+        </tr>
+        <tr>
+            <td><input type="submit"></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
+```
+
+
+
+- onsubmit事件
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="" id="form">
+    <label>user:</label>
+        <input type = "text"><br/>
+    <label>password:</label>
+        <input type="password"><br/>
+    <input type="submit">
+</form>
+<script type="text/javascript">
+    document.getElementById("form").onsubmit = function (){
+        alert("表单已提交");
+        console.log("表单已提交");
+    }
+</script>
+</body>
+</html>
+```
+
+
+
+## DOM模型
+
+DOM全称是Document Object Model 文档对象模型
+
+即将html页面文档中的标签，属性，文本都转换成为对象来管理
+
+
+
+- document对象
+
+DOM树示意图
+
+![](https://github.com/Tofweod/NoteImg/raw/main/src/JavaWeb/JavaScript/DOM/DOM01.png)
+
+Document对象理解
+
+​	1.document管理了所有的html文档内容
+
+​	2.document是一种树结构的文档，有层级关系
+
+​	3.可以把所有标签都对象化
+
+​	4.可以通过document访问所有的标签对象
+
+
+
+- document方法
+
+1.`document.getElementById(elementId)`：返回对拥有指定id的第一个对象的引用
+
+e.g.验证用户输入
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        function usernameonclickFun(){
+            var username = document.getElementById("username").value;
+            // 正则表达式
+            var patt = /^\w{5,12}$/;
+
+            var usernameSpan = document.getElementById("usernameSpan");
+            if (!patt.test(username)) { // test方法用于测试某字符串是否符合表达式
+                usernameSpan.style.color = "red";
+                usernameSpan.innerHTML = "用户名不合法"; // innerHTML表示起始标签和结束标签之间的内容，该属性可写、可读
+            }
+            else{
+                usernameSpan.style.color = "green";
+                usernameSpan.innerHTML = "用户名合法"; // innerHTML表示起始标签和结束标签之间的内容，该属性可写、可读
+            }
+        }
+    </script>
+</head>
+<body>
+    <label>user:</label><input type="text" id="username" onclick=""/>
+    <span id="usernameSpan"></span><br/>
+    <button onclick="usernameonclickFun()">校验</button>
+</body>
+</html>
+```
+
+
+
+2.`document.getElementsByName(elementName)`：返回带有指定名称的**对象集合**
+
+e.g.复选框全选、全不选、反选实现
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        var hobbies = document.getElementsByName("hobby"); // 集合顺序是其在html页面中从上往下的顺序
+        // 全选
+        function checkAll(){
+            for (var i = 0; i < hobbies.length; i++) {
+                hobbies[i].checked = true; // checked是复选框选中状态，为true和false，可读、可写
+            }
+        }
+
+        // 全不选
+        function checkNo(){
+            for (var i = 0; i < hobbies.length; i++) {
+                hobbies[i].checked = false;
+            }
+        }
+
+        // 反选
+        function checkReverse(){
+            for (var i = 0; i < hobbies.length; i++) {
+                if(hobbies[i].checked){
+                    hobbies[i].checked = false;
+                }
+                else {
+                    hobbies[i].checked = true;
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <input type="checkbox" name="hobby" value="Java" />Java
+    <input type="checkbox" name="hobby" value="CPP"/>CPP
+    <input type="checkbox" name="hobby" value="PHP"/>PHP
+    <br/>
+    <button onclick="checkAll()">全选</button>
+    <button onclick="checkNo()">全不选</button>
+    <button onclick="checkReverse()">反选</button>
+</body>
+</html>
+```
+
+
+
+3.`document.getElementsByTagName(elementTagName)`：返回带有指定标签名的**对象集合**
+
+==注意事项==：
+
+1.document对象三个查询方法，使用优先级: Id > Name > TagName
+
+2.[script脚本使用位置](https://www.cnblogs.com/ddyq/archive/2012/03/06/2382816.html)
+
+
+
+4.`createElement(tagName)`：通过给定标签名创建一个标签对象
+
+e.g.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+       window.onload = function (){
+           // 使用js创建div标签
+           var divElement = document.createElement("div");
+           divElement.innerHTML = "创建的div标签";
+
+           // document对象中提供对<body>的直接访问
+           document.body.appendChild(divElement);
+       }
+    </script>
+</head>
+<body>
+</body>
+</html>
+```
+
+
+
+- 节点常用方法和属性
+
+**节点就是标签对象**(包括注释)
+
+常用方法：
+
+1.`getElementsByTagName()`：获取当前节点的指定标签名的子节点
+
+2.`appendChild(oChildNode)`：添加一个子节点，oChildNode就是要添加的子节点
 
