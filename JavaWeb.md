@@ -1595,3 +1595,11 @@ e.g.
 
 2.`appendChild(oChildNode)`：添加一个子节点，oChildNode就是要添加的子节点
 
+
+
+# JQuery
+
+JQuery就是JavaScript和(查询)Query，是辅助JS开发的JS类库
+
+**核心思想**：==write less do more==
+

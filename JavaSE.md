@@ -3051,7 +3051,7 @@ public static void m3(){
   1.Class<?>也是类，继承Object类 （`<?>`表示不确定的Java类型）
   2.Class类不是new出来的，而是系统创建的`ClassLoader.loadClass();`
   3.对于某个类的Class类对象，在内存中只能有一份，因为在内存中只能加载一次
-  4.每个类的实例都会几点自己是由哪个Class实例生成的
+  4.每个类的实例都会记住自己是由哪个Class实例生成的
   5.通过Class对象以及一系列API可以完整得到一个类的完整结构
   6.Class对象是存放在堆中的
   7.[类的字节码二进制数据是放在方法区的，也称类的元数据（包括方法代码，变量名，方法名，访问权限等等）](https://zhihu.com/question/38496907)	
@@ -3071,6 +3071,7 @@ public static void m3(){
     前提:已知某个类的实例,调用该实例的`getClass()`获取Class对象
     ==应用场景==:通过创建好的对象,获取Class对象
   4.类加载器得到Class对象
+  
     ```java
     // 以car对象为例
     ClassLoader cl = car.getClass().getClassLoader();   
@@ -3081,7 +3082,7 @@ public static void m3(){
     // 以int为例
     Class<Integer> integerClass = int.class; // 存在自动装箱,拆箱过程(底层是Integer)
     ```
-  6.基本数据j类型对应包装类,可通过`.TYPE`得到Class对象
+  6.基本数据类型对应包装类,可通过`.TYPE`得到Class对象
     ```java
     Class<Integer> IntegerClass = Integer.TYPE;
     ```
@@ -5219,7 +5220,7 @@ public class JDBCUtils {
 
 3.JDBC连接MySQL中，如果要使用批处理，需要在url中加入参数`?rewriteBatchedStatements=true`
 
-4.批处理往往和PreparedStatement搭配使用，既可以减少编译次数，也可以运行次数，效率大大提升
+4.批处理往往和PreparedStatement搭配使用，既可以减少编译次数，也可以减少运行次数，效率大大提升
 
 e.g.
 
@@ -5290,7 +5291,7 @@ public class Batch_ {
 ```java
   public void addBatch() throws SQLException {
         if (this.batchedArgs == null) {
-            this.batchedArgs = new ArrayList(); // 第一次创建ArrayList-elementData => Object[]
+            this.batchedArgs = new ArrayList(); // 第一次创建ArrayList-elementData => Object[](Object数组可存放不同类型的数据)
         }
 
 		// 检测sql语句中占位符是否合法
