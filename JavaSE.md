@@ -1424,7 +1424,7 @@ while (iterator.hasNext()) {
 
 底层机制
 - （k,v）是一个实现了Map.Entry<K,V>的HashMap$Node
--  底层是数组+链表+红黑数
+-  底层是数组+链表+红黑树
 
 扩容机制
 1.HashMap底层的Node类型数组table（数组名），默认为null
@@ -1704,7 +1704,7 @@ java事件处理是采取“委派事件模型”。当事件发生时产生事�
 ```java
 // 获取cpu核数
 public static void main(String[] args) {
-	Runtime runtime = Runtime.getRuntime;
+	Runtime runtime = Runtime.getRuntime();
 	int cpuNum = runtime.availableProcessors();
 }
 ```
